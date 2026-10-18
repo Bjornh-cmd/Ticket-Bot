@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Link login · Reedhall</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell" style="grid-template-columns:1fr">
+    <div class="shell-main">
+      <header class="shell-top">
+        <a class="brand" href="/"><img class="brand-logo" src="/logo.png" alt="" />Reedhall</a>
+      </header>
+      <main class="shell-content" style="max-width:420px;margin:0 auto">
+        <div class="page-head">
+          <h1>Password</h1>
+          <% if (guildName) { %>
+            <p>Link login for <strong><%= guildName %></strong> · <code>/l/<%= slug %></code></p>
+          <% } else { %>
+            <p>Log in via secret link <code>/l/<%= slug %></code>.</p>
+          <% } %>
+        </div>
+        <% if (flash === 'bad_password') { %><p class="err-banner">Wrong password.</p><% } %>
+        <% if (flash === 'bad_config') { %><p class="err-banner">Link login is misconfigured or the server is unavailable.</p><% } %>
+        <% if (flash === 'captcha') { %><p class="err-banner">CAPTCHA failed. Complete Captcha is and try again.</p><% } %>
+        <section class="panel">
+          <form method="post" action="/l/<%= slug %>" class="form-grid">
+            <label class="full">Password
+              <input type="password" name="password" required autofocus />
+            </label>
+            <div class="full">
+              <%- include('partials/captcha-widget') %>
+            </div>
+            <button class="btn" type="submit" <%= (captchaReady || capReady) ? '' : 'disabled' %>>Log in</button>
+          </form>
+        </section>
+        <p class="muted"><a href="/login">← Other login options</a> · <a href="/privacy">Privacy</a></p>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

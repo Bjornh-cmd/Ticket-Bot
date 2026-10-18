@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="<%= guildLocale === 'nl' ? 'nl' : 'en' %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= guildMeta.name %> · Reedhall</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="shell-side">
+      <a class="brand" href="/dashboard"><img class="brand-logo" src="/logo.png" alt="" />Reedhall</a>
+      <nav class="side-nav">
+        <a href="/dashboard"><%= d('nav.overview') %></a>
+        <% if (features.analytics) { %><a href="/status/<%= guildMeta.id %>">Status</a><% } %>
+        <a href="/help"><%= d('nav.help') %></a>
+        <button type="button" class="active" data-tab="overview"><%= d('nav.server') %></button>
+        <% if (isGuildOwner && features.serverSetup) { %><button type="button" data-tab="setup"><%= d('nav.setup') %></button><% } %>
+        <button type="button" data-tab="settings"><%= d('nav.settings') %></button>
+        <button type="button" data-tab="access"><%= d('nav.access') %></button>
+        <button type="button" data-tab="tickets"><%= d('nav.tickets') %></button>
+        <button type="button" data-tab="messages"><%= d('nav.messages') %></button>
+        <button type="button" data-tab="polls"><%= d('nav.polls') %></button>
+        <button type="button" data-tab="giveaways"><%= d('nav.giveaways') %></button>
+        <% if (isGuildOwner && features.commandOverrides) { %><button type="button" data-tab="commands"><%= d('nav.commands') %></button><% } %>
+        <button type="button" data-tab="branding"><%= d('nav.branding') %></button>
+        <button type="button" data-tab="logs"><%= d('nav.logs') %></button>
+      </nav>
+      <div class="side-foot">
+        <div><%= guildMeta.name %></div>
+        <div style="margin-top:0.35rem" class="muted"><%= plan.name %> · <%= user.global_name || user.username %></div>
+      </div>
+    </aside>
+
+    <div class="shell-main">
+      <header class="shell-top">
+        <div>
+          <a class="back" href="/dashboard"><%= d('nav.backToServers') %></a>
+          <strong style="font-family:var(--display);display:block;margin-top:0.15rem"><%= guildMeta.name %></strong>
+        </div>
+        <div style="display:flex;gap:0.75rem;align-items:center">
+          <a class="btn ghost small" href="/logout"><%= d('nav.logout') %></a>
+        </div>
+      </header>
+
+      <nav class="mobile-nav" aria-label="<%= d('nav.sectionsAriaLabel') %>">
+        <button type="button" data-tab="overview"><%= d('nav.server') %></button>
+        <% if (isGuildOwner) { %><button type="button" data-tab="setup"><%= d('nav.setupShort') %></button><% } %>
+        <button type="button" data-tab="settings"><%= d('nav.settings') %></button>
+        <button type="button" data-tab="access"><%= d('nav.access') %></button>
+        <button type="button" data-tab="tickets"><%= d('nav.tickets') %></button>
+        <button type="button" data-tab="messages"><%= d('nav.messages') %></button>
+        <button type="button" data-tab="polls"><%= d('nav.polls') %></button>
+        <button type="button" data-tab="giveaways"><%= d('nav.giveaways') %></button>
+        <% if (isGuildOwner && features.commandOverrides) { %><button type="button" data-tab="commands"><%= d('nav.commands') %></button><% } %>
+        <button type="button" data-tab="branding"><%= d('nav.branding') %></button>
+        <button type="button" data-tab="logs"><%= d('nav.logsShort') %></button>
+      </nav>
+
+      <main class="shell-content">
+        <% if (saved) { %><p class="ok-banner"><%= d('flash.saved') %></p><% } %>
+        <% if (flash === 'panel_sent') { %><p class="ok-banner"><%= d('flash.panel_sent') %></p><% } %>
+        <% if (flash === 'type_added') { %><p class="ok-banner"><%= d('flash.type_added') %></p><% } %>
+        <% if (flash === 'type_saved') { %><p class="ok-banner"><%= d('flash.type_saved') %></p><% } %>
+        <% if (flash === 'type_deleted') { %><p class="ok-banner"><%= d('flash.type_deleted') %></p><% } %>
+        <% if (flash === 'type_missing') { %><p class="err-banner"><%= d('flash.type_missing') %></p><% } %>
+        <% if (flash === 'ticket_closed') { %><p class="ok-banner"><%= d('flash.ticket_closed') %></p><% } %>
+        <% if (flash === 'ticket_missing') { %><p class="err-banner"><%= d('flash.ticket_missing') %></p><% } %>
+        <% if (flash === 'poll_missing') { %><p class="err-banner"><%= d('flash.poll_missing') %></p><% } %>
+        <% if (flash === 'warn_deleted') { %><p class="ok-banner"><%= d('flash.warn_deleted') %></p><% } %>
+        <% if (flash === 'need_category') { %><p class="err-banner"><%= d('flash.need_category') %></p><% } %>
+        <% if (flash === 'bad_channel') { %><p class="err-banner"><%= d('flash.bad_channel') %></p><% } %>
+        <% if (flash === 'say_sent') { %><p class="ok-banner"><%= d('flash.say_sent') %></p><% } %>
+        <% if (flash === 'say_empty') { %><p class="err-banner"><%= d('flash.say_empty') %></p><% } %>
+        <% if (flash === 'say_failed') { %><p class="err-banner"><%= d('flash.say_failed') %></p><% } %>
+        <% if (flash === 'poll_sent') { %><p class="ok-banner"><%= d('flash.poll_sent') %></p><% } %>
+        <% if (flash === 'poll_ended') { %><p class="ok-banner"><%= d('flash.poll_ended') %></p><% } %>
+        <% if (flash === 'poll_invalid') { %><p class="err-banner"><%= d('flash.poll_invalid') %></p><% } %>
+        <% if (flash === 'poll_date') { %><p class="err-banner"><%= d('flash.poll_date') %></p><% } %>
+        <% if (flash === 'poll_failed') { %><p class="err-banner"><%= d('flash.poll_failed') %></p><% } %>
+        <% if (flash === 'plan_locked') { %><p class="err-banner"><%- d('flash.plan_locked', { plan: plan.name }) %></p><% } %>
+        <% if (flash === 'branding_locked') { %><p class="err-banner"><%- d('flash.branding_locked') %></p><% } %>
+        <% if (flash === 'branding_saved') { %><p class="ok-banner"><%= d('flash.branding_saved') %></p><% } %>
+        <% if (flash === 'branding_failed') { %><p class="err-banner"><%= d('flash.branding_failed') %></p><% } %>
+        <% if (flash === 'branding_png') { %><p class="err-banner"><%- d('flash.branding_png') %></p><% } %>
+        <% if (flash === 'branding_size') { %><p class="err-banner"><%= d('flash.branding_size') %></p><% } %>
+        <% if (flash === 'giveaway_sent') { %><p class="ok-banner"><%= d('flash.giveaway_sent') %></p><% } %>
+        <% if (flash === 'giveaway_ended') { %><p class="ok-banner"><%= d('flash.giveaway_ended') %></p><% } %>
+        <% if (flash === 'giveaway_reroll') { %><p class="ok-banner"><%= d('flash.giveaway_reroll') %></p><% } %>
+        <% if (flash === 'giveaway_invalid') { %><p class="err-banner"><%= d('flash.giveaway_invalid') %></p><% } %>
+        <% if (flash === 'giveaway_image') { %><p class="err-banner"><%= d('flash.giveaway_image') %></p><% } %>
+        <% if (flash === 'giveaway_failed') { %><p class="err-banner"><%= d('flash.giveaway_failed') %></p><% } %>
+        <% if (flash === 'giveaway_perms') { %><p class="err-banner"><%- d('flash.giveaway_perms') %></p><% } %>
+        <% if (flash === 'discord_perms') { %><p class="err-banner"><%- d('flash.discord_perms') %></p><% } %>
+        <% if (flash === 'discord_access') { %><p class="err-banner"><%- d('flash.discord_access') %></p><% } %>
+        <% if (flash === 'discord_unknown_channel') { %><p class="err-banner"><%- d('flash.discord_unknown_channel') %></p><% } %>
+        <% if (flash === 'discord_category_full') { %><p class="err-banner"><%- d('flash.discord_category_full') %></p><% } %>
+        <% if (flash === 'discord_cannot_dm') { %><p class="err-banner"><%- d('flash.discord_cannot_dm') %></p><% } %>
+        <% if (flash === 'discord_invalid') { %><p class="err-banner"><%- d('flash.discord_invalid') %></p><% } %>
+        <% if (flash === 'giveaway_active') { %><p class="err-banner"><%= d('flash.giveaway_active') %></p><% } %>
+        <% if (flash === 'giveaway_empty') { %><p class="err-banner"><%= d('flash.giveaway_empty') %></p><% } %>
+        <% if (flash === 'purge_done') { %><p class="ok-banner"><%= d('flash.purge_done') %></p><% } %>
+        <% if (flash === 'purge_one') { %><p class="ok-banner"><%= d('flash.purge_one') %></p><% } %>
+        <% if (flash === 'purge_failed') { %><p class="err-banner"><%= d('flash.purge_failed') %></p><% } %>
+        <% if (flash === 'setup_created') { %><p class="ok-banner"><%= d('flash.setup_created') %></p><% } %>
+        <% if (flash === 'setup_saved') { %><p class="ok-banner"><%= d('flash.setup_saved') %></p><% } %>
+        <% if (flash === 'setup_blueprint') { %><p class="ok-banner"><%= d('flash.setup_blueprint') %></p><% } %>
+        <% if (flash === 'setup_owner_only') { %><p class="err-banner"><%= d('flash.setup_owner_only') %></p><% } %>
+        <% if (flash === 'setup_failed') { %><p class="err-banner"><%= d('flash.setup_failed') %></p><% } %>
+        <% if (flash === 'setup_bad_channel') { %><p class="err-banner"><%= d('flash.setup_bad_channel') %></p><% } %>
+        <% if (flash === 'staff_added') { %><p class="ok-banner"><%- d('flash.staff_added') %></p><% } %>
+        <% if (flash === 'staff_removed') { %><p class="ok-banner"><%= d('flash.staff_removed') %></p><% } %>
+        <% if (flash === 'staff_owner_only') { %><p class="err-banner"><%= d('flash.staff_owner_only') %></p><% } %>
+        <% if (flash === 'staff_lobby') { %><p class="err-banner"><%= d('flash.staff_lobby') %></p><% } %>
+        <% if (flash === 'staff_limit') { %><p class="err-banner"><%= d('flash.staff_limit', { max: maxStaff, plan: plan.name }) %></p><% } %>
+        <% if (flash === 'staff_invalid') { %><p class="err-banner"><%= d('flash.staff_invalid') %></p><% } %>
+        <% if (flash === 'staff_self') { %><p class="err-banner"><%= d('flash.staff_self') %></p><% } %>
+        <% if (flash === 'staff_none') { %><p class="err-banner"><%= d('flash.staff_none') %></p><% } %>
+        <% if (flash === 'staff_exists') { %><p class="err-banner"><%= d('flash.staff_exists') %></p><% } %>
+        <% if (flash === 'link_saved') { %><p class="ok-banner"><%= d('flash.link_saved') %></p><% } %>
+        <% if (flash === 'link_owner_only') { %><p class="err-banner"><%= d('flash.link_owner_only') %></p><% } %>
+        <% if (flash === 'link_slug_taken') { %><p class="err-banner"><%= d('flash.link_slug_taken') %></p><% } %>
+        <% if (flash === 'link_password_required') { %><p class="err-banner"><%= d('flash.link_password_required') %></p><% } %>
+        <% if (flash === 'link_failed') { %><p class="err-banner"><%= d('flash.link_failed') %></p><% } %>
+        <% if (flash === 'cmd_saved') { %><p class="ok-banner"><%= d('flash.cmd_saved') %></p><% } %>
+        <% if (flash === 'cmd_invalid') { %><p class="err-banner"><%= d('flash.cmd_invalid') %></p><% } %>
+        <% if (flash === 'prefix_added') { %><p class="ok-banner"><%= d('flash.prefix_added') %></p><% } %>
+        <% if (flash === 'prefix_saved') { %><p class="ok-banner"><%= d('flash.prefix_saved') %></p><% } %>
+        <% if (flash === 'prefix_deleted') { %><p class="ok-banner"><%= d('flash.prefix_deleted') %></p><% } %>
+        <% if (flash === 'prefix_missing') { %><p class="err-banner"><%= d('flash.prefix_missing') %></p><% } %>
+        <% if (flash === 'prefix_empty') { %><p class="err-banner"><%= d('flash.prefix_empty') %></p><% } %>
+        <% if (flash === 'prefix_exists') { %><p class="err-banner"><%= d('flash.prefix_exists') %></p><% } %>
+        <% if (flash === 'prefix_invalid') { %><p class="err-banner"><%= d('flash.prefix_invalid') %></p><% } %>
+        <% if (flash === 'prefix_limit') { %><p class="err-banner"><%= d('flash.prefix_limit', { max: maxPrefixCommands === Infinity ? '∞' : maxPrefixCommands, plan: plan.name }) %></p><% } %>
+
+        <div class="tab-panels">
+          <div data-panel="overview" class="is-open">
+            <div class="page-head">
+              <h1><%= d('overview.title') %></h1>
+              <p><%= d('overview.lead', { server: guildMeta.name }) %></p>
+            </div>
+            <section class="metric-row">
+              <div class="metric"><strong><%= overview.members %></strong><span><%= d('overview.members') %></span></div>
+              <div class="metric"><strong><%= overview.channels %></strong><span><%= d('overview.channels') %></span></div>
+              <div class="metric"><strong><%= overview.openTickets %></strong><span><%= d('overview.openTickets') %></span></div>
+              <div class="metric"><strong><%= overview.activePolls %></strong><span><%= d('overview.activePolls') %></span></div>
+            </section>
+            <section class="panel">
+              <h2><%= d('overview.quickStart') %></h2>
+              <p class="muted"><%= d('overview.botLabel') %> <strong><%= overview.botNick %></strong> · <%= d('overview.planLabel') %> <strong><%= plan.name %></strong> · <%= d('overview.warnsLabel') %> <strong><%= overview.activeWarns %></strong></p>
+              <div class="cta-row">
+                <button type="button" class="btn" data-tab="settings"><%= d('nav.settings') %></button>
+                <% if (isGuildOwner) { %><button type="button" class="btn ghost" data-tab="setup"><%= d('nav.setup') %></button><% } %>
+                <% if (features.polls) { %><button type="button" class="btn ghost" data-tab="polls"><%= d('overview.newPoll') %></button><% } %>
+                <% if (features.botSay) { %><button type="button" class="btn ghost" data-tab="messages"><%= d('overview.sendMessage') %></button><% } %>
+                <% if (features.branding) { %><button type="button" class="btn ghost" data-tab="branding"><%= d('nav.branding') %></button><% } else { %>
+                  <a class="btn ghost" href="/account"><%= d('common.upgradeForBranding') %></a>
+                <% } %>
+              </div>
+            </section>
+            <% if (features.analytics && health) { %>
+            <section class="panel">
+              <h2><%= d('overview.analyticsTitle') %></h2>
+              <div class="metric-row">
+                <div class="metric"><strong><%= health.closedTickets %></strong><span><%= d('overview.closedTickets') %></span></div>
+                <div class="metric"><strong><%= health.modActions24h %></strong><span><%= d('overview.modActions24h') %></span></div>
+                <div class="metric"><strong><%= health.activeGiveaways %></strong><span><%= d('overview.activeGiveaways') %></span></div>
+              </div>
+              <p class="muted" style="margin:0.75rem 0 0"><a href="/status/<%= guildMeta.id %>"><%= d('overview.openStatus') %></a></p>
+            </section>
+            <% } %>
+            <section class="panel">
+              <h2><%= d('overview.checklistTitle') %></h2>
+              <ul class="checklist">
+                <li class="<%= overview.checklist.modRole ? 'done' : '' %>"><%= d('overview.checklistModRole') %></li>
+                <li class="<%= overview.checklist.supportRole ? 'done' : '' %>"><%= d('overview.checklistSupportRole') %></li>
+                <li class="<%= overview.checklist.ticketCategory ? 'done' : '' %>"><%= d('overview.checklistTicketCategory') %></li>
+                <li class="<%= overview.checklist.ticketTypes ? 'done' : '' %>"><%= d('overview.checklistTicketTypes') %></li>
+                <li class="<%= overview.checklist.ticketPanel ? 'done' : '' %>"><%= d('overview.checklistTicketPanel') %></li>
+                <li class="<%= overview.checklist.welcome ? 'done' : '' %>"><%= d('overview.checklistWelcome') %></li>
+                <li class="<%= overview.checklist.suggestions ? 'done' : '' %>"><%= d('overview.checklistSuggestions') %></li>
+              </ul>
+            </section>
+          </div>
+
+          <% if (isGuildOwner && features.serverSetup) { %>
+          <div data-panel="setup">
+            <div class="page-head">
+              <h1><%= d('nav.setup') %></h1>
+              <p><%- d('setup.lead') %></p>
+            </div>
+
+            <section class="panel">
+              <h2><%= d('setup.step1Title') %></h2>
+              <p class="muted"><%= d('setup.step1Lead') %></p>
+              <form method="post" action="/guild/<%= guildMeta.id %>/setup/create" id="blueprint-form" class="blueprint-form">
+                <div id="blueprint-cats" data-map-options='<%= JSON.stringify(botMapOptions || []) %>'>
+                  <% if (!(layoutBlueprint.categories || []).length) { %>
+                    <p class="muted" style="margin:0 0 0.75rem"><%= d('setup.emptyCategories') %></p>
+                  <% } %>
+                  <% (layoutBlueprint.categories || []).forEach(function(cat) { %>
+                    <div class="setup-block bp-cat" data-cat-id="<%= cat.id %>">
+                      <div class="bp-cat-head">
+                        <input type="hidden" name="bp_cat_id" value="<%= cat.id %>" />
+                        <label class="full"><%= d('setup.categoryLabel') %>
+                          <input name="bp_cat_name" value="<%= cat.name %>" required maxlength="100" />
+                        </label>
+                        <button type="button" class="btn ghost small bp-remove-cat"><%= d('setup.removeCategory') %></button>
+                      </div>
+                      <div class="bp-channels">
+                        <% (cat.channels || []).forEach(function(ch) { %>
+                          <div class="bp-channel-row">
+                            <input type="hidden" name="bp_ch_id_<%= cat.id %>" value="<%= ch.id %>" />
+                            <input name="bp_ch_name_<%= cat.id %>" value="<%= ch.name %>" placeholder="<%= d('setup.channelNamePlaceholder') %>" maxlength="100" required />
+                            <select name="bp_ch_map_<%= cat.id %>">
+                              <% (botMapOptions || []).forEach(function(opt) { %>
+                                <option value="<%= opt.value %>" <%= (ch.mapsTo || '') === opt.value ? 'selected' : '' %>><%= opt.label %></option>
+                              <% }) %>
+                            </select>
+                            <button type="button" class="btn ghost small bp-remove-ch" aria-label="<%= d('setup.removeAria') %>">−</button>
+                          </div>
+                        <% }) %>
+                      </div>
+                      <button type="button" class="btn ghost small bp-add-ch"><%= d('setup.addChannel') %></button>
+                    </div>
+                  <% }) %>
+                </div>
+                <div class="setup-block">
+                  <label class="full"><%= d('setup.hiddenTicketCategory') %>
+                    <input name="bp_ticket_cat_name" value="<%= layoutBlueprint.ticketCategory && layoutBlueprint.ticketCategory.name || '🎫 TICKETS' %>" maxlength="100" />
+                  </label>
+                </div>
+                <div class="cta-row" style="margin-top:0.5rem">
+                  <button type="button" class="btn ghost" id="bp-add-cat"><%= d('setup.addCategory') %></button>
+                  <button type="submit" formaction="/guild/<%= guildMeta.id %>/setup/blueprint" class="btn ghost"><%= d('setup.saveBlueprint') %></button>
+                  <button type="submit" class="btn" onclick="return confirm('<%= d('js.confirmCreateStructure') %>');"><%= d('setup.createStructure') %></button>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel">
+              <h2><%= d('setup.step2Title') %></h2>
+              <p class="muted"><%= d('setup.step2Lead') %></p>
+              <form method="post" action="/guild/<%= guildMeta.id %>/setup/save" class="setup-form">
+                <% (layoutBlueprint.categories || []).forEach(function(cat) { %>
+                  <div class="setup-block">
+                    <h3><%= cat.name %></h3>
+                    <label class="full"><%= d('setup.categoryOptional') %>
+                      <select name="cat_<%= cat.id %>">
+                        <option value=""><%= d('common.notLinked') %></option>
+                        <% categories.forEach(function(c) { %>
+                          <option value="<%= c.id %>" <%= layout.categories && layout.categories[cat.id] === c.id ? 'selected' : '' %>><%= c.name %></option>
+                        <% }) %>
+                      </select>
+                    </label>
+                    <div class="form-grid">
+                      <% (cat.channels || []).forEach(function(ch) { %>
+                        <label># <%= ch.name %>
+                          <select name="ch_<%= ch.id %>">
+                            <option value=""><%= d('common.notSet') %></option>
+                            <% textChannels.forEach(function(c) { %>
+                              <option value="<%= c.id %>" <%= layout.channels && layout.channels[ch.id] === c.id ? 'selected' : '' %>><%= c.name %></option>
+                            <% }) %>
+                          </select>
+                        </label>
+                      <% }) %>
+                    </div>
+                  </div>
+                <% }) %>
+                <div class="setup-block">
+                  <h3><%= layoutBlueprint.ticketCategory && layoutBlueprint.ticketCategory.name || '🎫 TICKETS' %></h3>
+                  <label class="full"><%= d('setup.ticketCategoryLive') %>
+                    <select name="cat_tickets_live">
+                      <option value=""><%= d('common.notSet') %></option>
+                      <% categories.forEach(function(c) { %>
+                        <option value="<%= c.id %>" <%= layout.categories && layout.categories.tickets_live === c.id ? 'selected' : '' %>><%= c.name %></option>
+                      <% }) %>
+                    </select>
+                  </label>
+                </div>
+                <button class="btn" type="submit"><%= d('setup.saveLinks') %></button>
+              </form>
+            </section>
+
+            <section class="panel">
+              <h2><%= d('setup.step3Title') %></h2>
+              <p class="muted"><%= d('setup.step3Lead') %></p>
+              <ol class="help-guide">
+                <li>
+                  <h3><%= d('setup.guideTicketsTitle') %></h3>
+                  <p><%= d('setup.guideTicketsBody') %></p>
+                  <button type="button" class="btn small" data-tab="tickets" style="margin-top:0.55rem"><%= d('nav.tickets') %></button>
+                </li>
+                <li>
+                  <h3><%= d('setup.guideStaffTitle') %></h3>
+                  <p><%= d('setup.guideStaffBody') %></p>
+                  <div class="cta-row" style="margin-top:0.55rem">
+                    <button type="button" class="btn small" data-tab="settings"><%= d('nav.settings') %></button>
+                    <button type="button" class="btn ghost small" data-tab="access"><%= d('nav.access') %></button>
+                  </div>
+                </li>
+                <li>
+                  <h3><%= d('setup.guidePanelTitle') %></h3>
+                  <p><%= d('setup.guidePanelBody') %></p>
+                </li>
+              </ol>
+              <ul class="checklist" style="margin-top:1rem">
+                <li class="<%= overview.checklist.ticketCategory ? 'done' : '' %>"><%= d('overview.checklistTicketCategory') %></li>
+                <li class="<%= overview.checklist.ticketTypes ? 'done' : '' %>"><%= d('overview.checklistTicketTypes') %></li>
+                <li class="<%= overview.checklist.supportRole ? 'done' : '' %>"><%= d('overview.checklistSupportRole') %></li>
+                <li class="<%= overview.checklist.modRole ? 'done' : '' %>"><%= d('overview.checklistModRole') %></li>
+                <li class="<%= overview.checklist.panelStaff ? 'done' : '' %>"><%= d('overview.checklistPanelStaff') %></li>
+                <li class="<%= overview.checklist.ticketPanel ? 'done' : '' %>"><%= d('overview.checklistTicketPanel') %></li>
+              </ul>
+              <p class="muted" style="margin:0.85rem 0 0"><a href="/help#setup"><%= d('setup.readHelp') %></a></p>
+            </section>
+          </div>
+          <% } %>
+
+          <div data-panel="settings">
+            <div class="page-head">
+              <h1><%= d('nav.settings') %></h1>
+              <p><%- d('settings.lead') %></p>
+            </div>
+
+            <section class="panel">
+              <h2><%= d('settings.rolesTitle') %></h2>
+              <p class="muted"><%= d('settings.rolesLead') %></p>
+              <form method="post" action="/guild/<%= guildMeta.id %>/settings" class="form-grid">
+                <input type="hidden" name="return_tab" value="settings" />
+                <label><%= d('settings.localeLabel') %>
+                  <select name="locale">
+                    <% (locales || []).forEach(function(l) { %>
+                      <option value="<%= l.id %>" <%= guildLocale === l.id ? 'selected' : '' %>><%= l.native %> (<%= l.label %>)</option>
+                    <% }) %>
+                  </select>
+                </label>
+                <label><%= d('settings.modRoleLabel') %>
+                  <select name="mod_role_id">
+                    <option value=""><%= d('common.notSet') %></option>
+                    <% roles.forEach(function(r) { %>
+                      <option value="<%= r.id %>" <%= settings.mod_role_id === r.id ? 'selected' : '' %>><%= r.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <label><%= d('settings.muteRoleLabel') %>
+                  <select name="mute_role_id">
+                    <option value=""><%= d('common.notSet') %></option>
+                    <% roles.forEach(function(r) { %>
+                      <option value="<%= r.id %>" <%= settings.mute_role_id === r.id ? 'selected' : '' %>><%= r.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <label><%= d('settings.modLogLabel') %>
+                  <select name="mod_log_channel_id">
+                    <option value=""><%= d('common.notSet') %></option>
+                    <% textChannels.forEach(function(c) { %>
+                      <option value="<%= c.id %>" <%= settings.mod_log_channel_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <p class="muted full" style="margin:0"><%- d('settings.localeNote') %></p>
+                <button class="btn" type="submit"><%= d('common.save') %></button>
+              </form>
+            </section>
+
+            <section class="panel">
+              <h2><%= d('settings.welcomeTitle') %></h2>
+              <% if (!features.welcome) { %>
+                <p class="err-banner" style="margin:0"><%- d('settings.welcomeLocked', { plan: plan.name }) %></p>
+              <% } else { %>
+              <p class="muted"><%- d('settings.placeholdersHint') %></p>
+              <form method="post" action="/guild/<%= guildMeta.id %>/settings" class="form-grid">
+                <label><%= d('settings.joinChannelLabel') %>
+                  <select name="join_channel_id">
+                    <option value=""><%= d('common.offOption') %></option>
+                    <% textChannels.forEach(function(c) { %>
+                      <option value="<%= c.id %>" <%= settings.join_channel_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <label><%= d('settings.leaveChannelLabel') %>
+                  <select name="leave_channel_id">
+                    <option value=""><%= d('common.offOption') %></option>
+                    <% textChannels.forEach(function(c) { %>
+                      <option value="<%= c.id %>" <%= settings.leave_channel_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <label class="full"><%= d('settings.joinMessageLabel') %>
+                  <textarea name="join_message" rows="2" placeholder="<%= d('settings.joinMessagePlaceholder') %>"><%= settings.join_message || '' %></textarea>
+                </label>
+                <label class="full"><%= d('settings.leaveMessageLabel') %>
+                  <textarea name="leave_message" rows="2" placeholder="<%= d('settings.leaveMessagePlaceholder') %>"><%= settings.leave_message || '' %></textarea>
+                </label>
+                <label><%= d('settings.embedColorLabel') %>
+                  <input name="embed_color" value="<%= settings.embed_color || '#0f766e' %>" />
+                </label>
+                <% if (features.suggestions) { %>
+                <label><%= d('settings.suggestionChannelLabel') %>
+                  <select name="suggestion_channel_id">
+                    <option value=""><%= d('common.notSet') %></option>
+                    <% textChannels.forEach(function(c) { %>
+                      <option value="<%= c.id %>" <%= settings.suggestion_channel_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <% } %>
+                <% if (features.autoRole) { %>
+                <label><%= d('settings.autoRoleLabel') %>
+                  <select name="auto_role_id">
+                    <option value=""><%= d('common.offOption') %></option>
+                    <% roles.forEach(function(r) { %>
+                      <option value="<%= r.id %>" <%= settings.auto_role_id === r.id ? 'selected' : '' %>><%= r.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <% } %>
+                <button class="btn" type="submit"><%= d('settings.saveCommunity') %></button>
+              </form>
+              <p class="muted" style="margin-top:0.75rem"><%- d('settings.commandsHint') %></p>
+              <% } %>
+            </section>
+          </div>
+
+          <div data-panel="access">
+            <div class="page-head">
+              <h1><%= d('access.title') %></h1>
+              <p><%- d('access.lead') %></p>
+            </div>
+            <section class="panel">
+              <p class="muted">
+                <%= d('access.planPrefix') %> <strong><%= plan.name %></strong>:
+                <% if (maxStaff === 0) { %><%= d('access.noExtraMods') %><% } else if (!Number.isFinite(maxStaff)) { %><%= d('access.unlimitedMods') %><% } else { %><%= d('access.maxMods', { max: maxStaff, current: panelStaff.length }) %><% } %>
+              </p>
+              <% if (!isGuildOwner) { %>
+                <p class="err-banner"><%= d('access.notOwner') %></p>
+              <% } else if (maxStaff === 0) { %>
+                <p class="err-banner"><%- d('access.lobbyLocked') %></p>
+              <% } else { %>
+                <form method="post" action="/guild/<%= guildMeta.id %>/staff" class="form-grid" id="staff-invite-form">
+                  <label><%= d('access.inviteViaLabel') %>
+                    <select name="invite_mode" id="staff-invite-mode">
+                      <option value="member"><%= d('access.optionMember') %></option>
+                      <option value="role"><%= d('access.optionRole') %></option>
+                    </select>
+                  </label>
+                  <label id="staff-member-wrap"><%= d('access.memberLabel') %>
+                    <select name="user_id" id="staff-user-select">
+                      <option value=""><%= d('common.chooseMember') %></option>
+                      <%
+                        var ownerId = discordGuild ? String(discordGuild.ownerId) : '';
+                        (members || []).forEach(function(m) {
+                          if (String(m.id) === ownerId) return;
+                      %>
+                        <option value="<%= m.id %>" data-username="<%= m.displayName %>"><%= m.displayName %> (@<%= m.username %>)</option>
+                      <% }) %>
+                    </select>
+                  </label>
+                  <label id="staff-role-wrap" hidden><%= d('access.roleLabel') %>
+                    <select name="role_id" id="staff-role-select">
+                      <option value=""><%= d('common.chooseRole') %></option>
+                      <% (roles || []).forEach(function(r) { %>
+                        <option value="<%= r.id %>">@<%= r.name %></option>
+                      <% }) %>
+                    </select>
+                  </label>
+                  <input type="hidden" name="username" id="staff-username" value="" />
+                  <p class="muted full" id="staff-invite-hint"><%= d('js.inviteHintMember', { server: guildMeta.name }) %></p>
+                  <% if (!(members || []).length) { %>
+                    <p class="err-banner full" style="margin:0">
+                      <%= d('access.noMembersLoaded') %>
+                      <a href="/guild/<%= guildMeta.id %>?refresh_members=1#access"><%= d('access.retryFetch') %></a>
+                    </p>
+                  <% } %>
+                  <button class="btn" type="submit"><%= d('access.inviteSubmit') %></button>
+                </form>
+              <% } %>
+            </section>
+            <section class="panel">
+              <h2><%= d('access.invitedTitle') %></h2>
+              <% if (!panelStaff.length) { %>
+                <p class="muted"><%- d('access.noneInvited') %></p>
+              <% } else { %>
+                <table>
+                  <thead><tr><th><%= d('access.thName') %></th><th><%= d('access.thUserId') %></th><th><%= d('access.thAdded') %></th><th></th></tr></thead>
+                  <tbody>
+                    <% panelStaff.forEach(function(s) {
+                      var mem = (members || []).find(function(m) { return m.id === s.user_id; });
+                      var label = s.username || (mem && mem.displayName) || '—';
+                    %>
+                      <tr>
+                        <td><%= label %></td>
+                        <td><code><%= s.user_id %></code></td>
+                        <td><%= s.created_at %></td>
+                        <td>
+                          <% if (isGuildOwner) { %>
+                            <form method="post" action="/guild/<%= guildMeta.id %>/staff/<%= s.user_id %>/remove">
+                              <button class="btn ghost small" type="submit"><%= d('common.remove') %></button>
+                            </form>
+                          <% } %>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              <% } %>
+            </section>
+
+            <section class="panel">
+              <h2><%= d('access.linkLoginTitle') %></h2>
+              <p class="muted"><%- d('access.linkLoginLead') %></p>
+              <% if (!features.linkLogin) { %>
+                <p class="err-banner" style="margin:0"><%- d('access.linkLoginLocked') %></p>
+              <% } else if (!isGuildOwner) { %>
+                <p class="err-banner"><%= d('access.linkLoginOwnerOnly') %></p>
+              <% } else { %>
+                <form method="post" action="/guild/<%= guildMeta.id %>/link-login" class="form-grid">
+                  <label class="full" style="display:flex;align-items:center;gap:0.55rem">
+                    <input type="checkbox" name="enabled" value="1" <%= guildLinkLogin && guildLinkLogin.enabled ? 'checked' : '' %> />
+                    <%= d('access.linkLoginEnable') %>
+                  </label>
+                  <label><%= d('access.linkLoginSlug') %>
+                    <input name="path_slug" value="<%= guildLinkLogin ? guildLinkLogin.pathSlug : '' %>" pattern="[A-Za-z0-9_-]+" required maxlength="64" />
+                  </label>
+                  <label><%= d('access.linkLoginPassword') %>
+                    <input type="password" name="password" placeholder="<%= guildLinkLogin && guildLinkLogin.hasPassword ? d('access.linkLoginPasswordKeep') : d('access.linkLoginPasswordNew') %>" <%= guildLinkLogin && guildLinkLogin.hasPassword ? '' : 'required' %> autocomplete="new-password" />
+                  </label>
+                  <button class="btn" type="submit"><%= d('access.linkLoginSave') %></button>
+                </form>
+                <% if (guildLinkLogin && guildLinkLogin.enabled) { %>
+                  <p class="ok-banner" style="margin-top:1rem">
+                    <%- d('access.linkLoginUrl', { url: dashboardUrl + '/l/' + guildLinkLogin.pathSlug }) %>
+                  </p>
+                <% } %>
+              <% } %>
+            </section>
+          </div>
+
+          <div data-panel="tickets">
+            <div class="page-head">
+              <h1><%= d('nav.tickets') %></h1>
+              <p><%= d('tickets.lead') %></p>
+            </div>
+
+            <section class="panel">
+              <h2><%= d('tickets.settingsTitle') %></h2>
+              <form method="post" action="/guild/<%= guildMeta.id %>/settings" class="form-grid">
+                <input type="hidden" name="return_tab" value="tickets" />
+                <label><%= d('tickets.categoryLabel') %>
+                  <select name="ticket_category_id">
+                    <option value=""><%= d('common.notSet') %></option>
+                    <% categories.forEach(function(c) { %>
+                      <option value="<%= c.id %>" <%= settings.ticket_category_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <label><%= d('tickets.logChannelLabel') %>
+                  <select name="ticket_log_channel_id">
+                    <option value=""><%= d('common.notSet') %></option>
+                    <% textChannels.forEach(function(c) { %>
+                      <option value="<%= c.id %>" <%= settings.ticket_log_channel_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <label><%= d('tickets.supportRoleLabel') %>
+                  <select name="support_role_id">
+                    <option value=""><%= d('common.notSet') %></option>
+                    <% roles.forEach(function(r) { %>
+                      <option value="<%= r.id %>" <%= settings.support_role_id === r.id ? 'selected' : '' %>><%= r.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <label><%= d('tickets.maxOpenLabel') %>
+                  <input type="number" name="max_open_tickets" min="1" max="10" value="<%= settings.max_open_tickets || 1 %>" />
+                </label>
+                <label class="full"><%= d('tickets.welcomeMessageLabel') %>
+                  <textarea name="welcome_message" rows="3"><%= settings.welcome_message || '' %></textarea>
+                </label>
+                <label><%= d('tickets.panelTitleLabel') %>
+                  <input name="ticket_panel_title" value="<%= settings.ticket_panel_title || 'Support Tickets' %>" />
+                </label>
+                <label><%= d('tickets.panelStyleLabel') %>
+                  <select name="ticket_panel_style">
+                    <option value="select" <%= (settings.ticket_panel_style || 'select') === 'select' ? 'selected' : '' %>><%= d('tickets.styleSelect') %></option>
+                    <option value="buttons" <%= settings.ticket_panel_style === 'buttons' ? 'selected' : '' %>><%= d('tickets.styleButtons') %></option>
+                  </select>
+                </label>
+                <label class="full"><%= d('tickets.panelDescriptionLabel') %>
+                  <textarea name="ticket_panel_description" rows="2"><%= settings.ticket_panel_description || '' %></textarea>
+                </label>
+                <button class="btn" type="submit"><%= d('common.save') %></button>
+              </form>
+              <p class="muted" style="margin-top:0.75rem"><%- d('tickets.dmClearHint') %></p>
+            </section>
+
+            <section class="panel">
+              <h2><%= d('tickets.categoriesTitle') %></h2>
+              <p class="muted"><%= d('tickets.categoriesLead') %></p>
+              <p class="muted"><%= d('tickets.questionsLead') %></p>
+              <% if (ticketTypes.length) { %>
+                <% ticketTypes.forEach(function(t) { %>
+                  <details class="ticket-type-card" <%= String(flash) === 'type_saved' ? '' : '' %>>
+                    <summary>
+                      <span><%= t.emoji || '🎫' %> <strong><%= t.name %></strong></span>
+                      <span class="muted">
+                        <%= (t.questions && t.questions.length) ? d('tickets.questionsCount', { n: t.questions.length }) : d('tickets.questionsDefault') %>
+                      </span>
+                    </summary>
+                    <form method="post" action="/guild/<%= guildMeta.id %>/ticket-types/<%= t.id %>" class="form-grid" style="margin-top:0.85rem">
+                      <label><%= d('tickets.nameLabel') %><input name="name" value="<%= t.name %>" required /></label>
+                      <label><%= d('tickets.emojiLabel') %><input name="emoji" value="<%= t.emoji || '🎫' %>" maxlength="8" /></label>
+                      <label class="full"><%= d('tickets.descriptionLabel') %><input name="description" value="<%= t.description || '' %>" /></label>
+                      <div class="full">
+                        <h3 style="margin:0.35rem 0 0.55rem;font-size:0.95rem"><%= d('tickets.questionsTitle') %></h3>
+                        <p class="muted" style="margin:0 0 0.65rem"><%= d('tickets.questionsHint') %></p>
+                        <% if (features.ticketQuestionnaires) { %>
+                          <div class="ticket-questions-wrap" data-max="5">
+                            <div class="ticket-questions-list">
+                              <% (t.questions || []).forEach(function(q, qi) { %>
+                                <div class="ticket-q-row">
+                                  <label><span class="ticket-q-label"><%= d('tickets.questionLabel', { n: qi + 1 }) %></span>
+                                    <input data-q-field="label" name="q<%= qi + 1 %>_label" value="<%= q.label %>" maxlength="45" placeholder="<%= d('tickets.questionPlaceholder') %>" />
+                                  </label>
+                                  <label><%= d('tickets.questionFieldPlaceholder') %>
+                                    <input data-q-field="placeholder" name="q<%= qi + 1 %>_placeholder" value="<%= q.placeholder || '' %>" maxlength="100" placeholder="<%= d('tickets.questionFieldPlaceholderExample') %>" />
+                                  </label>
+                                  <label><%= d('tickets.questionStyle') %>
+                                    <select data-q-field="style" name="q<%= qi + 1 %>_style">
+                                      <option value="paragraph" <%= q.style !== 'short' ? 'selected' : '' %>><%= d('tickets.styleParagraph') %></option>
+                                      <option value="short" <%= q.style === 'short' ? 'selected' : '' %>><%= d('tickets.styleShort') %></option>
+                                    </select>
+                                  </label>
+                                  <label class="check-inline">
+                                    <input data-q-field="required" type="checkbox" name="q<%= qi + 1 %>_required" value="1" <%= q.required ? 'checked' : '' %> />
+                                    <%= d('tickets.questionRequired') %>
+                                  </label>
+                                  <button type="button" class="ticket-q-remove" aria-label="<%= d('js.removeAria') %>">−</button>
+                                </div>
+                              <% }) %>
+                            </div>
+                            <button type="button" class="btn ghost small ticket-q-add" style="margin-top:0.55rem"><%= d('tickets.addQuestion') %></button>
+                          </div>
+                        <% } else { %>
+                          <p class="err-banner" style="margin:0"><%- d('tickets.questionsLocked') %></p>
+                        <% } %>
+                      </div>
+                      <div class="cta-row full">
+                        <button class="btn" type="submit"><%= d('tickets.saveTypeButton') %></button>
+                      </div>
+                    </form>
+                    <form method="post" action="/guild/<%= guildMeta.id %>/ticket-types/<%= t.id %>/delete" style="margin-top:0.65rem" onsubmit="return confirm('<%= d('tickets.confirmDeleteType') %>');">
+                      <button class="btn ghost small" type="submit"><%= d('common.remove') %></button>
+                    </form>
+                  </details>
+                <% }) %>
+              <% } else { %>
+                <p class="muted"><%= d('tickets.noCategoriesYet') %></p>
+              <% } %>
+
+              <h3 style="margin:1.25rem 0 0.55rem;font-size:1rem"><%= d('tickets.addCategoryTitle') %></h3>
+              <form method="post" action="/guild/<%= guildMeta.id %>/ticket-types" class="form-grid">
+                <label><%= d('tickets.nameLabel') %><input name="name" placeholder="Support" required /></label>
+                <label><%= d('tickets.emojiLabel') %><input name="emoji" placeholder="🎫" maxlength="8" /></label>
+                <label class="full"><%= d('tickets.descriptionLabel') %><input name="description" placeholder="<%= d('tickets.descriptionPlaceholder') %>" /></label>
+                <div class="full">
+                  <h3 style="margin:0.35rem 0 0.55rem;font-size:0.95rem"><%= d('tickets.questionsTitle') %></h3>
+                  <p class="muted" style="margin:0 0 0.65rem"><%= d('tickets.questionsHint') %></p>
+                  <% if (features.ticketQuestionnaires) { %>
+                    <div class="ticket-questions-wrap" data-max="5">
+                      <div class="ticket-questions-list"></div>
+                      <button type="button" class="btn ghost small ticket-q-add" style="margin-top:0.55rem"><%= d('tickets.addQuestion') %></button>
+                    </div>
+                  <% } else { %>
+                    <p class="err-banner" style="margin:0"><%- d('tickets.questionsLocked') %></p>
+                  <% } %>
+                </div>
+                <button class="btn" type="submit"><%= d('tickets.addButton') %></button>
+              </form>
+            </section>
+
+            <section class="panel">
+              <h2><%= d('tickets.placePanelTitle') %></h2>
+              <p class="muted"><%= d('tickets.placePanelLead') %></p>
+              <form method="post" action="/guild/<%= guildMeta.id %>/panel" class="form-grid">
+                <label><%= d('common.channelLabel') %>
+                  <select name="channel_id" required>
+                    <option value=""><%= d('common.chooseChannel') %></option>
+                    <% textChannels.forEach(function(c) { %>
+                      <option value="<%= c.id %>">#<%= c.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <button class="btn" type="submit"><%= d('tickets.placeButton') %></button>
+              </form>
+            </section>
+
+            <section class="panel">
+              <h2><%= d('tickets.openRecentTitle') %></h2>
+              <% if (!tickets.length) { %>
+                <p class="muted" style="margin:0"><%= d('tickets.noneYet') %></p>
+              <% } else { %>
+                <table>
+                  <thead><tr><th><%= d('tickets.thNumber') %></th><th><%= d('common.status') %></th><th><%= d('tickets.thCategory') %></th><th><%= d('tickets.thOpener') %></th><th><%= d('tickets.thClaimed') %></th><th><%= d('common.createdAt') %></th><th></th></tr></thead>
+                  <tbody>
+                    <% tickets.forEach(function(t) { %>
+                      <tr>
+                        <td><%= t.ticket_number %></td>
+                        <td><span class="badge <%= t.status %>"><%= t.status %></span></td>
+                        <td><%= t.subject || '—' %></td>
+                        <td><code><%= t.opener_id %></code></td>
+                        <td><%= t.claimed_by || '—' %></td>
+                        <td><%= t.created_at %></td>
+                        <td>
+                          <% if (t.status === 'open') { %>
+                            <form method="post" action="/guild/<%= guildMeta.id %>/tickets/<%= t.id %>/close">
+                              <button class="btn ghost small" type="submit"><%= d('common.close') %></button>
+                            </form>
+                          <% } %>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              <% } %>
+            </section>
+          </div>
+
+          <div data-panel="messages">
+            <div class="page-head">
+              <h1><%= d('nav.messages') %></h1>
+              <p><%= d('messages.lead') %></p>
+            </div>
+            <% if (!features.botSay) { %>
+              <section class="panel">
+                <p class="err-banner" style="margin:0"><%- d('messages.locked', { plan: plan.name }) %></p>
+              </section>
+            <% } else { %>
+            <section class="panel">
+              <h2><%= d('messages.sendTitle') %></h2>
+              <form method="post" action="/guild/<%= guildMeta.id %>/say" class="form-grid">
+                <label><%= d('common.channelLabel') %>
+                  <select name="channel_id" required>
+                    <option value=""><%= d('common.chooseChannel') %></option>
+                    <% textChannels.forEach(function(c) { %>
+                      <option value="<%= c.id %>">#<%= c.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <label><%= d('messages.embedColorLabel') %>
+                  <input name="embed_color" value="#0f766e" placeholder="#0f766e" />
+                </label>
+                <label class="full"><%= d('messages.contentLabel') %>
+                  <textarea name="content" rows="4" placeholder="<%= d('messages.contentPlaceholder') %>"></textarea>
+                </label>
+                <label><%= d('messages.embedTitleLabel') %>
+                  <input name="embed_title" placeholder="<%= d('messages.embedTitlePlaceholder') %>" />
+                </label>
+                <label>
+                  <span style="display:flex;align-items:center;gap:0.5rem;margin-top:1.6rem">
+                    <input type="checkbox" name="as_embed" value="1" checked />
+                    <%= d('messages.asEmbedLabel') %>
+                  </span>
+                </label>
+                <label class="full"><%= d('messages.embedDescLabel') %>
+                  <textarea name="embed_description" rows="2" placeholder="Optioneel"></textarea>
+                </label>
+                <button class="btn" type="submit"><%= d('messages.sendButton') %></button>
+              </form>
+            </section>
+            <section class="panel">
+              <h2><%= d('messages.deleteTitle') %></h2>
+              <p class="muted"><%= d('messages.deleteLead') %></p>
+              <form method="post" action="/guild/<%= guildMeta.id %>/purge" class="form-grid">
+                <label><%= d('common.channelLabel') %>
+                  <select name="channel_id" required>
+                    <option value=""><%= d('common.chooseChannel') %></option>
+                    <% textChannels.forEach(function(c) { %>
+                      <option value="<%= c.id %>">#<%= c.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <label><%= d('messages.amountLabel') %>
+                  <input type="number" name="amount" min="1" max="100" value="10" />
+                </label>
+                <label class="full"><%= d('messages.messageIdLabel') %>
+                  <input name="message_id" placeholder="<%= d('messages.messageIdPlaceholder') %>" />
+                </label>
+                <label>
+                  <span style="display:flex;align-items:center;gap:0.5rem;margin-top:1.6rem">
+                    <input type="checkbox" name="only_bot" value="1" />
+                    <%= d('messages.onlyBotLabel') %>
+                  </span>
+                </label>
+                <button class="btn ghost" type="submit"><%= d('messages.deleteButton') %></button>
+              </form>
+            </section>
+            <% } %>
+
+            <section class="panel">
+              <h2><%= d('messages.prefixTitle') %></h2>
+              <p class="muted"><%- d('messages.prefixLead') %></p>
+              <% if (!features.customPrefixCommands) { %>
+                <p class="err-banner" style="margin-top:0.75rem"><%- d('messages.prefixLocked', { plan: plan.name }) %></p>
+              <% } else { %>
+                <% const prefixCount = customPrefixCommands.length; %>
+                <% const prefixMax = maxPrefixCommands; %>
+                <p class="muted" style="margin-top:0.35rem">
+                  <% if (prefixMax === Infinity) { %>
+                    <%= d('messages.prefixLimitUnlimited', { count: prefixCount }) %>
+                  <% } else { %>
+                    <%= d('messages.prefixLimitLabel', { count: prefixCount, max: prefixMax }) %>
+                  <% } %>
+                </p>
+                <% if (prefixMax !== Infinity && prefixCount > prefixMax) { %>
+                  <p class="err-banner" style="margin-top:0.65rem"><%= d('messages.prefixOverLimit', { max: prefixMax }) %></p>
+                <% } %>
+
+                <% if (customPrefixCommands.length) { %>
+                  <% customPrefixCommands.forEach(function(cmd) { %>
+                    <% const cmdChannel = cmd.channel_id ? textChannels.find(function(c) { return c.id === cmd.channel_id; }) : null; %>
+                    <details class="ticket-type-card" style="margin-top:0.75rem">
+                      <summary>
+                        <span><code>!<%= cmd.trigger %></code></span>
+                        <span class="muted"><%= cmdChannel ? '#' + cmdChannel.name : d('messages.prefixChannelAll') %></span>
+                      </summary>
+                      <form method="post" action="/guild/<%= guildMeta.id %>/prefix-commands/<%= cmd.id %>" class="form-grid" style="margin-top:0.85rem">
+                        <label><%= d('messages.prefixTriggerLabel') %>
+                          <input name="trigger" value="<%= cmd.trigger %>" placeholder="<%= d('messages.prefixTriggerPlaceholder') %>" required maxlength="32" />
+                          <span class="muted" style="font-size:0.82rem"><%= d('messages.prefixTriggerHint') %></span>
+                        </label>
+                        <label><%= d('messages.prefixChannelLabel') %>
+                          <select name="channel_id">
+                            <option value=""><%= d('messages.prefixChannelAll') %></option>
+                            <% textChannels.forEach(function(c) { %>
+                              <option value="<%= c.id %>" <%= cmd.channel_id === c.id ? 'selected' : '' %>>#<%= c.name %></option>
+                            <% }) %>
+                          </select>
+                        </label>
+                        <label class="full"><%= d('messages.prefixResponseLabel') %>
+                          <textarea name="response" rows="5" required maxlength="2000" placeholder="<%= d('messages.prefixResponsePlaceholder') %>"><%= cmd.response %></textarea>
+                        </label>
+                        <button class="btn" type="submit"><%= d('messages.prefixSaveButton') %></button>
+                      </form>
+                      <form method="post" action="/guild/<%= guildMeta.id %>/prefix-commands/<%= cmd.id %>/delete" style="margin-top:0.65rem" onsubmit="return confirm('<%= d('messages.prefixConfirmDelete') %>');">
+                        <button class="btn ghost" type="submit"><%= d('common.remove') %></button>
+                      </form>
+                    </details>
+                  <% }) %>
+                <% } else { %>
+                  <p class="muted" style="margin:0.75rem 0 0"><%= d('messages.prefixEmpty') %></p>
+                <% } %>
+
+                <% if (prefixMax === Infinity || prefixCount < prefixMax) { %>
+                  <form method="post" action="/guild/<%= guildMeta.id %>/prefix-commands" class="form-grid" style="margin-top:1rem">
+                    <label><%= d('messages.prefixTriggerLabel') %>
+                      <input name="trigger" placeholder="<%= d('messages.prefixTriggerPlaceholder') %>" required maxlength="32" />
+                      <span class="muted" style="font-size:0.82rem"><%= d('messages.prefixTriggerHint') %></span>
+                    </label>
+                    <label><%= d('messages.prefixChannelLabel') %>
+                      <select name="channel_id">
+                        <option value=""><%= d('messages.prefixChannelAll') %></option>
+                        <% textChannels.forEach(function(c) { %>
+                          <option value="<%= c.id %>">#<%= c.name %></option>
+                        <% }) %>
+                      </select>
+                    </label>
+                    <label class="full"><%= d('messages.prefixResponseLabel') %>
+                      <textarea name="response" rows="5" required maxlength="2000" placeholder="<%= d('messages.prefixResponsePlaceholder') %>"></textarea>
+                    </label>
+                    <button class="btn" type="submit"><%= d('messages.prefixAddButton') %></button>
+                  </form>
+                <% } %>
+              <% } %>
+            </section>
+          </div>
+
+          <div data-panel="polls">
+            <div class="page-head">
+              <h1><%= d('nav.polls') %></h1>
+              <p><%= d('polls.lead') %></p>
+            </div>
+            <% if (!features.polls) { %>
+              <section class="panel">
+                <p class="err-banner" style="margin:0"><%- d('polls.locked', { plan: plan.name }) %></p>
+              </section>
+            <% } else { %>
+            <section class="panel">
+              <form method="post" action="/guild/<%= guildMeta.id %>/polls" class="form-grid">
+                <label class="full"><%= d('polls.questionLabel') %>
+                  <input name="question" placeholder="<%= d('polls.questionPlaceholder') %>" required />
+                </label>
+                <label><%= d('common.channelLabel') %>
+                  <select name="channel_id" required>
+                    <option value=""><%= d('common.chooseChannel') %></option>
+                    <% textChannels.forEach(function(c) { %>
+                      <option value="<%= c.id %>">#<%= c.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <label><%= d('common.endsAtLabel') %>
+                  <input type="datetime-local" name="ends_at" required />
+                </label>
+                <label class="full">
+                  <span style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+                    <label style="display:flex;align-items:center;gap:0.4rem;margin:0">
+                      <input type="checkbox" name="vote_once" value="1" checked />
+                      <%= d('polls.voteOnceLabel') %>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;margin:0">
+                      <input type="checkbox" name="allow_multi" value="1" />
+                      <%= d('polls.allowMultiLabel') %>
+                    </label>
+                  </span>
+                </label>
+                <div class="full poll-options-wrap">
+                  <div class="poll-options-head">
+                    <strong><%= d('polls.answersTitle') %></strong>
+                    <span class="muted"><%= d('polls.answersHint') %></span>
+                  </div>
+                  <div id="poll-options" class="poll-options" data-max="10"></div>
+                  <button type="button" class="btn ghost small" id="poll-add-option"><%= d('polls.addAnswerButton') %></button>
+                </div>
+                <button class="btn" type="submit"><%= d('polls.submitButton') %></button>
+              </form>
+            </section>
+
+            <% if (typeof polls !== 'undefined' && polls.length) { %>
+              <section class="panel">
+                <h2><%= d('polls.recentTitle') %></h2>
+                <table>
+                  <thead><tr><th><%= d('common.id') %></th><th><%= d('polls.thQuestion') %></th><th><%= d('common.status') %></th><th><%= d('common.endsAt') %></th><th></th></tr></thead>
+                  <tbody>
+                    <% polls.forEach(function(p) { %>
+                      <tr>
+                        <td>#<%= p.id %></td>
+                        <td><%= p.question %></td>
+                        <td><span class="badge <%= p.status %>"><%= p.status %></span></td>
+                        <td><%= new Date(p.ends_at).toLocaleString(guildLocale === 'nl' ? 'nl-NL' : 'en-GB') %></td>
+                        <td>
+                          <% if (p.status === 'active') { %>
+                            <form method="post" action="/guild/<%= guildMeta.id %>/polls/<%= p.id %>/end">
+                              <button class="btn ghost small" type="submit"><%= d('common.close') %></button>
+                            </form>
+                          <% } %>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </section>
+            <% } %>
+            <% } %>
+          </div>
+
+          <div data-panel="giveaways">
+            <div class="page-head">
+              <h1><%= d('nav.giveaways') %></h1>
+              <p><%= d('giveaways.lead') %></p>
+            </div>
+            <% if (!features.giveaways) { %>
+              <section class="panel">
+                <p class="err-banner" style="margin:0"><%- d('giveaways.locked') %></p>
+              </section>
+            <% } else { %>
+              <section class="panel">
+                <form method="post" action="/guild/<%= guildMeta.id %>/giveaways" class="form-grid">
+                  <label class="full"><%= d('giveaways.titleLabel') %>
+                    <input name="title" placeholder="<%= d('giveaways.titlePlaceholder') %>" required maxlength="200" />
+                  </label>
+                  <label><%= d('giveaways.prizeLabel') %>
+                    <input name="prize" placeholder="<%= d('giveaways.prizePlaceholder') %>" required maxlength="200" />
+                  </label>
+                  <label><%= d('giveaways.winnersCountLabel') %>
+                    <input type="number" name="winners_count" min="1" max="20" value="1" />
+                  </label>
+                  <label><%= d('common.channelLabel') %>
+                    <select name="channel_id" required>
+                      <option value=""><%= d('common.chooseChannel') %></option>
+                      <% textChannels.forEach(function(c) { %>
+                        <option value="<%= c.id %>">#<%= c.name %></option>
+                      <% }) %>
+                    </select>
+                  </label>
+                  <label><%= d('common.endsAtLabel') %>
+                    <input type="datetime-local" name="ends_at" required />
+                  </label>
+                  <label><%= d('giveaways.requiredRoleLabel') %>
+                    <select name="required_role_id">
+                      <option value=""><%= d('common.none') %></option>
+                      <% (roles || []).forEach(function(r) { %>
+                        <option value="<%= r.id %>">@<%= r.name %></option>
+                      <% }) %>
+                    </select>
+                  </label>
+                  <label class="full"><%= d('giveaways.descriptionLabel') %>
+                    <textarea name="description" rows="2" placeholder="<%= d('giveaways.descriptionPlaceholder') %>"></textarea>
+                  </label>
+                  <label class="full"><%= d('giveaways.prizeDmLabel') %>
+                    <textarea name="prize_dm" rows="3" placeholder="<%= d('giveaways.prizeDmPlaceholder') %>"></textarea>
+                  </label>
+                  <p class="muted full" style="margin:0"><%- d('giveaways.placeholdersHint') %></p>
+                  <label class="full"><%= d('giveaways.imageUrlLabel') %>
+                    <input name="image_url" type="url" placeholder="https://…/banner.png" />
+                  </label>
+                  <button class="btn" type="submit"><%= d('giveaways.submitButton') %></button>
+                </form>
+                <p class="muted" style="margin-top:0.75rem"><%- d('giveaways.commandHint') %></p>
+              </section>
+              <% if (typeof giveaways !== 'undefined' && giveaways.length) { %>
+                <section class="panel">
+                  <h2><%= d('giveaways.recentTitle') %></h2>
+                  <table>
+                    <thead><tr><th><%= d('common.id') %></th><th><%= d('giveaways.thTitle') %></th><th><%= d('common.status') %></th><th><%= d('common.endsAt') %></th><th></th></tr></thead>
+                    <tbody>
+                      <% giveaways.forEach(function(g) { %>
+                        <tr>
+                          <td>#<%= g.id %></td>
+                          <td><%= g.title %></td>
+                          <td><span class="badge <%= g.status %>"><%= g.status %></span></td>
+                          <td><%= new Date(g.ends_at).toLocaleString(guildLocale === 'nl' ? 'nl-NL' : 'en-GB') %></td>
+                          <td style="display:flex;gap:0.35rem;flex-wrap:wrap">
+                            <% if (g.status === 'active') { %>
+                              <form method="post" action="/guild/<%= guildMeta.id %>/giveaways/<%= g.id %>/end">
+                                <button class="btn ghost small" type="submit"><%= d('giveaways.endButton') %></button>
+                              </form>
+                            <% } else { %>
+                              <form method="post" action="/guild/<%= guildMeta.id %>/giveaways/<%= g.id %>/reroll">
+                                <button class="btn ghost small" type="submit"><%= d('giveaways.rerollButton') %></button>
+                              </form>
+                            <% } %>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </section>
+              <% } %>
+            <% } %>
+          </div>
+
+          <% if (isGuildOwner && features.commandOverrides) { %>
+          <div data-panel="commands">
+            <div class="page-head">
+              <h1><%= d('nav.commands') %></h1>
+              <p><%= d('commands.lead') %></p>
+            </div>
+            <section class="panel">
+              <h2><%= d('commands.serverWideTitle') %></h2>
+              <p class="muted"><%= d('commands.serverWideLead') %></p>
+              <div class="cmd-list">
+                <% (commandList || []).forEach(function(cmd) {
+                  var off = (disabledCommands || []).indexOf(cmd.name) !== -1;
+                %>
+                  <div class="cmd-row <%= off ? 'is-off' : 'is-on' %>">
+                    <div class="cmd-meta">
+                      <code>/<%= cmd.name %></code>
+                      <span class="muted"><%= cmd.description || '—' %></span>
+                    </div>
+                    <form method="post" action="/guild/<%= guildMeta.id %>/commands/toggle" class="cmd-toggle">
+                      <input type="hidden" name="scope" value="guild" />
+                      <input type="hidden" name="command" value="<%= cmd.name %>" />
+                      <input type="hidden" name="enabled" value="<%= off ? '1' : '0' %>" />
+                      <button type="submit" class="btn small <%= off ? 'ghost' : '' %>" aria-pressed="<%= off ? 'false' : 'true' %>">
+                        <%= off ? d('common.off') : d('common.on') %>
+                      </button>
+                    </form>
+                  </div>
+                <% }) %>
+              </div>
+            </section>
+
+            <section class="panel">
+              <h2><%= d('commands.perUserTitle') %></h2>
+              <p class="muted"><%= d('commands.perUserLead') %></p>
+              <form method="get" action="/guild/<%= guildMeta.id %>" class="form-grid cmd-user-form" style="margin-bottom:1rem">
+                <label class="full"><%= d('commands.memberLabel') %>
+                  <div class="inline-row">
+                    <select name="cmd_user" required>
+                      <option value=""><%= d('commands.chooseMember') %></option>
+                      <% (members || []).forEach(function(m) { %>
+                        <option value="<%= m.id %>" <%= overrideUserId === m.id ? 'selected' : '' %>><%= m.displayName %> (@<%= m.username %>)</option>
+                      <% }) %>
+                    </select>
+                    <button class="btn" type="submit"><%= d('commands.loadButton') %></button>
+                  </div>
+                </label>
+              </form>
+              <% if (overrideUserId) { %>
+                <p class="muted" style="margin-top:0"><%= d('commands.overridesFor') %> <code><%= overrideUserId %></code></p>
+                <div class="cmd-list">
+                  <% (commandList || []).forEach(function(cmd) {
+                    var off = (userDisabledCommands || []).indexOf(cmd.name) !== -1;
+                  %>
+                    <div class="cmd-row <%= off ? 'is-off' : 'is-on' %>">
+                      <div class="cmd-meta">
+                        <code>/<%= cmd.name %></code>
+                        <span class="muted"><%= cmd.description || '—' %></span>
+                      </div>
+                      <form method="post" action="/guild/<%= guildMeta.id %>/commands/toggle" class="cmd-toggle">
+                        <input type="hidden" name="scope" value="user" />
+                        <input type="hidden" name="user_id" value="<%= overrideUserId %>" />
+                        <input type="hidden" name="command" value="<%= cmd.name %>" />
+                        <input type="hidden" name="enabled" value="<%= off ? '1' : '0' %>" />
+                        <button type="submit" class="btn small <%= off ? 'ghost' : '' %>">
+                          <%= off ? d('common.off') : d('common.on') %>
+                        </button>
+                      </form>
+                    </div>
+                  <% }) %>
+                </div>
+              <% } %>
+              <% if (overrideUsers && overrideUsers.length) { %>
+                <h3 style="margin-top:1.25rem;font-size:0.95rem"><%= d('commands.usersWithOverrides') %></h3>
+                <ul class="override-users">
+                  <% overrideUsers.forEach(function(uid) { %>
+                    <li>
+                      <a href="/guild/<%= guildMeta.id %>?cmd_user=<%= uid %>#commands"><code><%= uid %></code></a>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } %>
+            </section>
+          </div>
+          <% } %>
+
+          <div data-panel="branding">
+            <div class="page-head">
+              <h1><%= d('branding.title') %></h1>
+              <p><%= d('branding.lead') %></p>
+              <p class="muted"><%- d('branding.deskPricing') %></p>
+            </div>
+            <% if (!features.branding) { %>
+              <section class="panel">
+                <p class="err-banner" style="margin:0"><%- d('branding.locked') %></p>
+              </section>
+            <% } else { %>
+              <section class="panel">
+                <div class="branding-preview">
+                  <% if (overview.botAvatar) { %>
+                    <img src="<%= overview.botAvatar %>" alt="" width="72" height="72" />
+                  <% } %>
+                  <div>
+                    <strong><%= overview.botNick %></strong>
+                    <p class="muted" style="margin:0.25rem 0 0"><%= d('branding.currentDisplay', { server: guildMeta.name }) %></p>
+                  </div>
+                </div>
+                <form method="post" action="/guild/<%= guildMeta.id %>/branding" class="form-grid" style="margin-top:1rem" enctype="multipart/form-data">
+                  <label><%= d('branding.nickLabel') %>
+                    <input name="bot_nick" maxlength="32" value="<%= settings.bot_nick || overview.botNick || '' %>" placeholder="Reedhall" />
+                  </label>
+                  <label class="full"><%= d('branding.avatarLabel') %>
+                    <input name="avatar_file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,.png,.jpg,.jpeg,.webp,.gif,.ico" />
+                  </label>
+                  <label>
+                    <span style="display:flex;align-items:center;gap:0.5rem;margin-top:1.6rem">
+                      <input type="checkbox" name="reset_avatar" value="1" />
+                      <%= d('branding.resetLabel') %>
+                    </span>
+                  </label>
+                  <button class="btn" type="submit"><%= d('branding.saveButton') %></button>
+                </form>
+                <p class="muted" style="margin-top:0.75rem"><%= d('branding.footnote') %></p>
+              </section>
+            <% } %>
+          </div>
+
+          <div data-panel="logs">
+            <div class="page-head">
+              <h1><%= d('nav.logs') %></h1>
+              <p><%= d('logs.lead') %></p>
+            </div>
+            <section class="panel">
+              <h2><%= d('logs.modLogTitle') %></h2>
+              <% if (!actions.length) { %>
+                <p class="muted"><%= d('logs.noActions') %></p>
+              <% } else { %>
+                <table>
+                  <thead><tr><th><%= d('logs.thAction') %></th><th><%= d('logs.thTarget') %></th><th><%= d('logs.thModerator') %></th><th><%= d('logs.thReason') %></th><th><%= d('logs.thWhen') %></th></tr></thead>
+                  <tbody>
+                    <% actions.forEach(function(a) { %>
+                      <tr>
+                        <td><%= a.action %></td>
+                        <td><code><%= a.target_id %></code></td>
+                        <td><code><%= a.moderator_id %></code></td>
+                        <td><%= a.reason || '—' %></td>
+                        <td><%= a.created_at %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              <% } %>
+            </section>
+            <section class="panel">
+              <h2><%= d('logs.activeWarningsTitle') %></h2>
+              <% if (!warnings.length) { %>
+                <p class="muted"><%= d('logs.noWarnings') %></p>
+              <% } else { %>
+                <table>
+                  <thead><tr><th><%= d('common.id') %></th><th><%= d('logs.thUser') %></th><th><%= d('logs.thModerator') %></th><th><%= d('logs.thReason') %></th><th><%= d('logs.thDate') %></th><th></th></tr></thead>
+                  <tbody>
+                    <% warnings.forEach(function(w) { %>
+                      <tr>
+                        <td>#<%= w.id %></td>
+                        <td><code><%= w.user_id %></code></td>
+                        <td><code><%= w.moderator_id %></code></td>
+                        <td><%= w.reason %></td>
+                        <td><%= w.created_at %></td>
+                        <td>
+                          <form method="post" action="/guild/<%= guildMeta.id %>/warnings/<%= w.id %>/delete">
+                            <button class="btn ghost small" type="submit"><%= d('common.remove') %></button>
+                          </form>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              <% } %>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script nonce="<%= typeof cspNonce !== 'undefined' ? cspNonce : '' %>">window.REEDHALL_I18N = <%- dashJsJson || '{}' %>;</script>
+  <script nonce="<%= typeof cspNonce !== 'undefined' ? cspNonce : '' %>" src="/app.js"></script>
+</body>
+</html>

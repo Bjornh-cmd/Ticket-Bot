@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Help · Reedhall</title>
+  <meta name="description" content="How Reedhall works: link a Discord server, run the setup guide, configure tickets and staff, and use ticket commands." />
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="landing">
+  <header class="topbar">
+    <a class="brand" href="/"><img class="brand-logo" src="/logo.png" alt="" />Reedhall</a>
+    <nav>
+      <a href="/" class="nav-link">Home</a>
+      <a href="/privacy" class="nav-link">Privacy</a>
+      <% if (loggedIn) { %>
+        <a class="btn ghost" href="/dashboard">Dashboard</a>
+      <% } else { %>
+        <a class="btn" href="/login">Log in</a>
+      <% } %>
+    </nav>
+  </header>
+
+  <main class="help-solo help-wide">
+    <header class="help-hero">
+      <p class="help-kicker">Reedhall docs</p>
+      <h1>How Reedhall works</h1>
+      <p>Link a Discord server, follow the setup guide (channels, tickets, staff), then members open tickets from a panel. Staff handle them with slash commands.</p>
+      <div class="cta-row">
+        <% if (loggedIn) { %>
+          <a class="btn" href="/servers">Link a server</a>
+          <a class="btn ghost" href="/dashboard">Open dashboard</a>
+        <% } else { %>
+          <a class="btn" href="/login">Log in with Discord</a>
+          <a class="btn ghost" href="/">Home</a>
+        <% } %>
+      </div>
+    </header>
+
+    <nav class="help-toc">
+      <a href="#how">How it works</a>
+      <a href="#setup">Setup guide</a>
+      <a href="#tickets">Tickets</a>
+      <a href="#staff">Staff</a>
+      <a href="#commands">Commands</a>
+    </nav>
+
+    <section class="panel" id="how">
+      <h2>How it works</h2>
+      <p class="help-lead">Same flow as the setup guide below — link first, then configure the desk (<strong>Server setup</strong>, <strong>Settings</strong>, <strong>Access</strong>, <strong>Tickets</strong>).</p>
+      <div class="help-flow">
+        <article>
+          <div class="help-flow-head">
+            <span>1</span>
+            <h3>Log in</h3>
+          </div>
+          <p>Log in with <strong>Discord</strong> (CAPTCHA + OAuth). Optionally use a <strong>password link</strong> for one server if the owner enabled it (Estate). Reedhall lists servers where you are owner or admin.</p>
+        </article>
+        <article>
+          <div class="help-flow-head">
+            <span>2</span>
+            <h3>Link a server</h3>
+          </div>
+          <p>Dashboard → <strong>Servers</strong> → Koppelen → <strong>Bot uitnodigen</strong>. Wait until Reedhall is online. Only linked servers get tickets, moderation, and the web desk.</p>
+        </article>
+        <article>
+          <div class="help-flow-head">
+            <span>3</span>
+            <h3>Configure once</h3>
+          </div>
+          <p>Desk → <strong>Server setup</strong> (create/link channels), then <strong>Settings</strong> (mod role), <strong>Access</strong> (panel mods, link-login on Estate), and <strong>Tickets</strong> (category, support role, types, questionnaires, panel).</p>
+        </article>
+        <article>
+          <div class="help-flow-head">
+            <span>4</span>
+            <h3>Members open tickets</h3>
+          </div>
+          <p>They pick a category on the panel, fill in the Discord form (with your custom questions and placeholders), and a private channel is created for them + staff.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="setup">
+      <h2>Setup guide — new Discord server</h2>
+      <p class="help-lead">Do this in order after linking. On the desk: <strong>Server setup</strong> (owner), then <strong>Settings</strong>, <strong>Access</strong>, and <strong>Tickets</strong>.</p>
+      <ol class="help-guide">
+        <li>
+          <h3>Link &amp; invite</h3>
+          <p>Dashboard → <strong>Servers</strong> → Koppelen → Bot uitnodigen. Wait until Reedhall is online in the server.</p>
+        </li>
+        <li>
+          <h3>Create the channel structure</h3>
+          <p>Desk → <strong>Server setup</strong>. Rename categories, map slots (welcome, logs, ticket panel), then <strong>Create structure on Discord</strong>. Or skip and link existing channels in step 2 of that page.</p>
+        </li>
+        <li>
+          <h3>Tickets</h3>
+          <p>Desk → <strong>Tickets</strong>:</p>
+          <ul>
+            <li>Choose the hidden <strong>ticket category</strong> (where open tickets appear).</li>
+            <li>Set a <strong>support role</strong> and optional ticket log channel.</li>
+            <li>Add <strong>categories</strong> (Support, Report, …) and optional questionnaires.</li>
+            <li><strong>Post the panel</strong> in a public channel.</li>
+          </ul>
+        </li>
+        <li>
+          <h3>Staff</h3>
+          <p>Desk → <strong>Settings</strong>: set the <strong>mod role</strong> (kick/ban/warn). Desk → <strong>Access</strong>: invite extra panel mods (Desk/Estate). Discord owner / Administrator / Manage Server already have full desk access.</p>
+        </li>
+        <li>
+          <h3>Test</h3>
+          <p>Open a ticket from the panel, claim it with <code>/ticket claim</code>, then close with <code>/ticket close</code> or <code>/ticket requestclose</code>.</p>
+        </li>
+      </ol>
+      <% if (loggedIn) { %>
+        <p class="muted" style="margin:1rem 0 0">Open a linked server in the dashboard — the Setup tab shows this checklist live.</p>
+      <% } %>
+    </section>
+
+    <section class="panel" id="tickets">
+      <h2>Tickets</h2>
+      <p>Members never type a command to open a ticket. They use the panel. Staff work inside the ticket channel.</p>
+      <div class="help-cmd-grid">
+        <div><code>/ticket panel</code><span>Post the panel (admin). Prefer the dashboard.</span></div>
+        <div><code>/ticket claim</code><span>Claim and rename the channel to your name.</span></div>
+        <div><code>/ticket add / remove</code><span>Add or remove a member.</span></div>
+        <div><code>/ticket rename</code><span>Rename the ticket channel.</span></div>
+        <div><code>/ticket move</code><span>Move this ticket to another Discord category.</span></div>
+        <div><code>/ticket notes</code><span>Private staff thread the opener cannot see.</span></div>
+        <div><code>/ticket priority</code><span>Name (High, VIP, …) plus optional role and user to ping.</span></div>
+        <div><code>/ticket requestclose</code><span>Ask to close; opener or staff confirm with buttons.</span></div>
+        <div><code>/ticket close</code><span>Close now. Channel is deleted after 5 seconds.</span></div>
+        <div><code>/ticket transcript</code><span>Download the conversation as a .txt file.</span></div>
+        <div><code>/ticket reopen</code><span>Reopen. Use <code>number</code> if the channel is already gone.</span></div>
+      </div>
+    </section>
+
+    <section class="panel" id="staff">
+      <h2>Who can do what</h2>
+      <ul class="help-list">
+        <li><strong>Discord owner / Administrator / Manage Server</strong> — full desk, setup, tickets, staff invites.</li>
+        <li><strong>Support role</strong> — claim, close, notes, priority, move, transcripts inside tickets.</li>
+        <li><strong>Mod role</strong> — <code>/kick</code> <code>/ban</code> <code>/warn</code> <code>/purge</code> and other mod commands.</li>
+        <li><strong>Invited panel mods</strong> — dashboard for that server (Desk/Estate plans).</li>
+        <li><strong>Ticket opener</strong> — can close or request close their own ticket.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="commands">
+      <h2>Other commands</h2>
+      <ul class="help-list">
+        <li><code>/dashboard</code> — open the web desk</li>
+        <li><code>/mod</code> — staff quick menu</li>
+        <li><code>/suggest</code> <code>/poll</code> <code>/announce</code> <code>/giveaway</code> — community (plan-dependent)</li>
+        <li><code>/help</code> <code>/ping</code> <code>/serverinfo</code> — info</li>
+      </ul>
+      <div class="cta-row" style="margin-top:1rem">
+        <% if (loggedIn) { %>
+          <a class="btn" href="/commands">Full command list</a>
+          <a class="btn ghost" href="/support">Support chat</a>
+        <% } else { %>
+          <a class="btn" href="/login">Log in</a>
+          <a class="btn ghost" href="/">Home</a>
+        <% } %>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <span>Reedhall</span>
+    <span><a href="/privacy">Privacy</a> · <a href="/">Home</a></span>
+  </footer>
+</body>
+</html>

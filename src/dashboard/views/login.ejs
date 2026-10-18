@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Log in · Reedhall</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell" style="grid-template-columns:1fr">
+    <div class="shell-main">
+      <header class="shell-top">
+        <a class="brand" href="/"><img class="brand-logo" src="/logo.png" alt="" />Reedhall</a>
+      </header>
+      <main class="shell-content" style="max-width:480px;margin:0 auto">
+        <div class="page-head">
+          <h1>Log in</h1>
+          <p>Verify with Captcha, then continue with Discord — or use a password link if one was set up for your server.</p>
+        </div>
+        <section class="panel">
+          <% if (flash === 'oauth_failed') { %><p class="err-banner">Login failed. Please try again.</p><% } %>
+          <% if (flash === 'captcha') { %><p class="err-banner">CAPTCHA failed. Complete Captcha and try again.</p><% } %>
+          <% if (!captchaReady && !capReady) { %><p class="err-banner">CAPTCHA is not configured (missing CAPTCHA_IS_* secrets). Ask the platform admin.</p><% } %>
+          <form method="post" action="/login/discord" class="stack-form" id="discord-login-form">
+            <%- include('partials/captcha-widget') %>
+            <p id="rh-captcha-hint" class="muted" style="margin:0;font-size:0.85rem">Complete the captcha to enable Discord login.</p>
+            <button class="btn" type="submit" id="discord-login-btn" style="width:100%" disabled>Log in with Discord</button>
+          </form>
+          <p class="muted" style="margin-top:0.85rem;font-size:0.85rem">
+            See our <a href="/privacy">Privacy</a> policy.
+          </p>
+        </section>
+        <% if (linkLogin && linkLogin.enabled) { %>
+          <section class="panel">
+            <h2>Link login</h2>
+            <p class="muted">Password link for a specific server (if enabled by an admin).</p>
+            <a class="btn ghost" href="/l/<%= linkLogin.pathSlug %>">Open link login</a>
+          </section>
+        <% } %>
+      </main>
+    </div>
+  </div>
+  <script nonce="<%= cspNonce %>">
+    document.getElementById('discord-login-form')?.addEventListener('submit', function (ev) {
+      var field = document.querySelector('#discord-login-form .rh-captcha-token-field');
+      var widget = document.querySelector('.captcha-is');
+      var token = (field && field.value) || (widget && widget.getAttribute('data-token')) || '';
+      if (field && token) field.value = token;
+      if (!token) {
+        ev.preventDefault();
+        var hint = document.getElementById('rh-captcha-hint');
+        if (hint) hint.textContent = 'Complete the captcha first.';
+      }
+    });
+  </script>
+</body>
+</html>

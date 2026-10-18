@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title %> · Reedhall</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell" style="grid-template-columns:1fr">
+    <div class="shell-main">
+      <header class="shell-top">
+        <a class="brand" href="<%= user ? '/dashboard' : '/' %>"><img class="brand-logo" src="/logo.png" alt="" />Reedhall</a>
+        <% if (user) { %>
+          <a class="btn ghost small" href="/logout">Log out</a>
+        <% } else { %>
+          <a class="btn ghost small" href="/login">Log in</a>
+        <% } %>
+      </header>
+      <main class="shell-content error-page">
+        <section class="error-card">
+          <p class="error-code"><%= status %> · <%= code %></p>
+          <h1><%= title %></h1>
+          <p class="error-lead"><%= message %></p>
+
+          <% if (reported && reportOk) { %>
+            <p class="ok-banner">Thanks — your report was sent to the Reedhall team.</p>
+          <% } else if (reported && reportError) { %>
+            <p class="err-banner"><%= reportError %></p>
+          <% } %>
+
+          <div class="error-actions">
+            <a class="btn" href="<%= user ? '/dashboard' : '/' %>">Go home</a>
+            <% if (user) { %><a class="btn ghost" href="/servers">Servers</a><% } %>
+          </div>
+
+          <% if (!reported || !reportOk) { %>
+            <div class="error-report">
+              <h2>Report this error</h2>
+              <p class="muted">Send a short note to the Reedhall admin server. No passwords or tokens, please.</p>
+              <form method="post" action="/error/report" class="stack-form">
+                <input type="hidden" name="token" value="<%= reportToken %>" />
+                <div class="report-field">
+                  <label class="report-field-label" for="error-note">What were you doing?</label>
+                  <div class="report-field-shell">
+                    <textarea
+                      id="error-note"
+                      name="note"
+                      rows="5"
+                      maxlength="1000"
+                      placeholder="Optional — e.g. I was saving ticket settings on my server…"
+                    ></textarea>
+                    <div class="report-field-meta">
+                      <span>Optional</span>
+                      <span>Max 1000 characters</span>
+                    </div>
+                  </div>
+                </div>
+                <%- include('partials/captcha-widget') %>
+                <button type="submit" class="btn" <%= typeof captchaReady !== 'undefined' && !captchaReady && typeof capReady !== 'undefined' && !capReady ? 'disabled' : '' %>>Send report</button>
+              </form>
+            </div>
+          <% } %>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

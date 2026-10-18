@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reedhall — Discord staff desk</title>
+  <meta name="description" content="Reedhall is de staff desk voor Discord: tickets, moderatie, polls en berichten. Koppel je server zelf — zonder IDs." />
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="landing">
+  <header class="topbar">
+    <a class="brand" href="/"><img class="brand-logo" src="/logo.png" alt="" />Reedhall</a>
+    <nav>
+      <a href="#producten" class="nav-link">Producten</a>
+      <a href="#vergelijken" class="nav-link">Vergelijken</a>
+      <a href="/help" class="nav-link">Help</a>
+      <a href="/privacy" class="nav-link">Privacy</a>
+      <% if (loggedIn) { %>
+        <a class="btn ghost" href="/dashboard">Dashboard</a>
+        <a class="btn" href="/account">Plan</a>
+      <% } else { %>
+        <a class="btn" href="/login">Inloggen</a>
+      <% } %>
+    </nav>
+  </header>
+
+  <section class="hero-plane">
+    <div class="hero-visual" aria-hidden="true"></div>
+    <div class="hero-copy">
+      <div class="brand hero-brand"><img class="brand-logo lg" src="/logo.png" alt="" />Reedhall</div>
+      <h1>Staff desk voor Discord-servers.</h1>
+      <p class="lead">Gratis starten op 1 server met basis features. Upgrade voor polls, welkom, branding en meer servers.</p>
+      <div class="cta-row">
+        <% if (loggedIn) { %>
+          <a class="btn large" href="/servers">Server koppelen</a>
+          <a class="btn ghost large" href="/account">Bekijk je plan</a>
+        <% } else { %>
+          <a class="btn large" href="/login">Start gratis</a>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <section class="products" id="producten">
+    <div class="products-inner">
+      <p class="section-kicker">Producten</p>
+      <h2 class="section-display">Kies wat bij je community past</h2>
+      <p class="section-lead">Lobby is gratis en beperkt. Desk en Estate unlocken meer tools.</p>
+
+      <div class="price-grid">
+        <article class="price-plan">
+          <h3>Lobby</h3>
+          <p class="price"><span>Gratis</span></p>
+          <p class="plan-desc">1 server · beperkte functies. Ideaal om te testen.</p>
+          <ul>
+            <li>1 gekoppelde server</li>
+            <li>Tickets &amp; basis moderatie</li>
+            <li>Dashboard toegang</li>
+            <li class="muted-li">Geen polls / welkom / branding</li>
+          </ul>
+          <a class="btn ghost" href="<%= loggedIn ? '/account' : '/login' %>">Begin gratis</a>
+        </article>
+
+        <article class="price-plan featured">
+          <p class="plan-badge">Meest gekozen</p>
+          <h3>Desk</h3>
+          <p class="price"><span>€5</span><small>/mo</small></p>
+          <p class="plan-desc">1 server · €8/mo voor 5 servers. Iets goedkoper dan vergelijkbare bots.</p>
+          <ul>
+            <li>€5/mo · 1 server</li>
+            <li>€8/mo · tot 5 servers</li>
+            <li>Polls + goede antwoorden</li>
+            <li>Welkom, leave &amp; auto-rol</li>
+            <li>Suggesties, aankondigingen, bot-berichten</li>
+            <li>Advanced moderatie &amp; ticket-vragenlijsten</li>
+          </ul>
+          <a class="btn" href="<%= loggedIn ? '/account' : '/login' %>">Kies Desk</a>
+        </article>
+
+        <article class="price-plan">
+          <h3>Estate</h3>
+          <p class="price"><span id="estate-price-display">€24</span><small>/mo</small></p>
+          <p class="plan-desc">Kies zelf hoeveel servers — prijs schaalt mee. Inclusief alles van Desk plus exclusieve Estate-functies.</p>
+          <label class="estate-picker">
+            Aantal servers (typ zelf)
+            <input type="number" id="estate-servers" name="estate_servers" min="1" max="500" value="10" />
+          </label>
+          <ul>
+            <li>Alles in Desk, onbeperkt servers &amp; mods</li>
+            <li>🎨 Gegenereerde rank card afbeelding</li>
+            <li>⚡ Aangepaste XP-vermenigvuldiger (1x–5x) per server</li>
+            <li>🤖 Eigen bot-status tekst per server instellen</li>
+            <li>🛡️ AI auto-moderatie (spam &amp; toxiciteitsfilter)</li>
+            <li>Bot-naam &amp; avatar per server · analytics · link-login</li>
+          </ul>
+          <a class="btn ghost" id="estate-cta" href="<%= loggedIn ? '/account?plan=estate&servers=10' : '/login' %>">Kies Estate</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="products compare-section" id="vergelijken">
+    <div class="products-inner">
+      <p class="section-kicker">Vergelijken</p>
+      <h2 class="section-display">Wat zit er in welk plan?</h2>
+      <p class="section-lead">Zo zie je precies wat Lobby, Desk en Estate unlocken.</p>
+
+      <div class="compare-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Functie</th>
+              <th>Lobby</th>
+              <th>Desk</th>
+              <th>Estate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% featureRows.forEach(function(row) { %>
+              <tr>
+                <td><%= row.label %></td>
+                <td><%- typeof row.lobby === 'boolean' ? (row.lobby ? '✓' : '—') : row.lobby %></td>
+                <td><%- typeof row.desk === 'boolean' ? (row.desk ? '✓' : '—') : row.desk %></td>
+                <td><%- typeof row.estate === 'boolean' ? (row.estate ? '✓' : '—') : row.estate %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="how">
+    <div class="products-inner">
+      <p class="section-kicker">Zo werkt koppelen</p>
+      <h2 class="section-display">Drie stappen. Geen IDs.</h2>
+      <ol class="steps">
+        <li><strong>Log in</strong> met Discord</li>
+        <li><strong>Kies je plan</strong> (Lobby is standaard gratis)</li>
+        <li><strong>Koppel &amp; nodig de bot uit</strong> — klaar</li>
+      </ol>
+    </div>
+  </section>
+
+  <footer class="site-foot">
+    <a class="brand" href="/"><img class="brand-logo" src="/logo.png" alt="" />Reedhall</a>
+    <span><a href="/help">Help</a> · <a href="/privacy">Privacy</a></span>
+  </footer>
+  <script src="/app.js"></script>
+</body>
+</html>

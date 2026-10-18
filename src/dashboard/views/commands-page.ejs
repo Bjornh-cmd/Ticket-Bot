@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Commands · Reedhall</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="shell-side">
+      <%- include('partials/side-nav', { active: 'commands' }) %>
+      <div class="side-foot">
+        <div><%= user.global_name || user.username %></div>
+      </div>
+    </aside>
+    <div class="shell-main">
+      <header class="shell-top">
+        <strong style="font-family:var(--display)">Commands</strong>
+        <a class="btn ghost small" href="/logout">Log out</a>
+      </header>
+      <main class="shell-content">
+        <div class="page-head">
+          <h1>Discord slash commands</h1>
+          <p>Commands available to Reedhall (<%= cmds.length %>).</p>
+        </div>
+        <section class="panel">
+          <table>
+            <thead><tr><th>Command</th><th>Description</th></tr></thead>
+            <tbody>
+              <% cmds.forEach(function(c) { %>
+                <tr>
+                  <td><code>/<%= c.name %></code></td>
+                  <td><%= c.description %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

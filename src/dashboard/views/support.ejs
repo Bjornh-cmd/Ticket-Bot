@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Support · Reedhall</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="shell-side">
+      <%- include('partials/side-nav', { active: 'support' }) %>
+      <div class="side-foot">
+        <div><%= user.global_name || user.username %></div>
+      </div>
+    </aside>
+    <div class="shell-main">
+      <header class="shell-top">
+        <strong style="font-family:var(--display)">Support chat</strong>
+        <a class="btn ghost small" href="/logout">Log out</a>
+      </header>
+      <main class="shell-content support-layout">
+        <aside class="support-list panel">
+          <h2>Your chats</h2>
+          <% if (!threads.length) { %>
+            <p class="muted">No conversations yet.</p>
+          <% } else { %>
+            <ul class="support-thread-list">
+              <% threads.forEach(function(t) { %>
+                <li class="<%= activeThread && activeThread.id === t.id ? 'active' : '' %>">
+                  <a href="/support/<%= t.id %>">
+                    <strong><%= t.subject %></strong>
+                    <span class="muted"><%= t.status %> · <%= t.updated_at %></span>
+                  </a>
+                </li>
+              <% }) %>
+            </ul>
+          <% } %>
+        </aside>
+
+        <section class="support-main panel">
+          <% if (flash === 'sent') { %><p class="ok-banner">Message sent.</p><% } %>
+          <% if (flash === 'captcha') { %><p class="err-banner">CAPTCHA failed. Try again.</p><% } %>
+          <% if (flash === 'empty') { %><p class="err-banner">Write a message first.</p><% } %>
+
+          <% if (!activeThread) { %>
+            <h2>Start a conversation</h2>
+            <p class="muted">Ask about plans, linking, tickets, or bugs. Admins reply here.</p>
+            <form method="post" action="/support" class="stack-form">
+              <label>
+                Subject
+                <input type="text" name="subject" maxlength="120" placeholder="e.g. Can't link my server" required />
+              </label>
+              <div class="report-field">
+                <label class="report-field-label" for="support-body">Message</label>
+                <div class="report-field-shell">
+                  <textarea id="support-body" name="body" rows="5" maxlength="4000" required placeholder="Describe what you need help with…"></textarea>
+                </div>
+              </div>
+              <button type="submit" class="btn">Send</button>
+            </form>
+          <% } else { %>
+            <div class="support-head">
+              <div>
+                <h2><%= activeThread.subject %></h2>
+                <p class="muted">#<%= activeThread.id %> · <%= activeThread.status %></p>
+              </div>
+              <a class="btn ghost small" href="/support">New chat</a>
+            </div>
+            <div class="support-chat">
+              <% messages.forEach(function(m) { %>
+                <div class="support-bubble <%= m.sender_type === 'admin' ? 'admin' : 'user' %>">
+                  <div class="support-meta">
+                    <%= m.sender_type === 'admin' ? 'Reedhall team' : (m.sender_name || 'You') %>
+                    · <%= m.created_at %>
+                  </div>
+                  <p><%= m.body %></p>
+                </div>
+              <% }) %>
+            </div>
+            <% if (activeThread.status === 'open') { %>
+              <form method="post" action="/support/<%= activeThread.id %>/reply" class="stack-form" style="margin-top:1rem">
+                <div class="report-field-shell">
+                  <textarea name="body" rows="3" maxlength="4000" required placeholder="Write a reply…"></textarea>
+                </div>
+                <button type="submit" class="btn">Reply</button>
+              </form>
+            <% } else { %>
+              <p class="muted">This chat is closed. Start a new one if you still need help.</p>
+            <% } %>
+          <% } %>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

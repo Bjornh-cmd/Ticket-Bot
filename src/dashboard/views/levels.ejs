@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title %> · Reedhall</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.65rem;
+      margin: 0.75rem 0;
+    }
+    .preset-card {
+      position: relative;
+      cursor: pointer;
+    }
+    .preset-card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .preset-card label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      padding: 0.4rem;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .preset-card input[type="radio"]:checked + label {
+      border-color: var(--accent, #1a7f5a);
+    }
+    .preset-swatch {
+      width: 100%;
+      height: 60px;
+      border-radius: 7px;
+    }
+    .preset-name {
+      font-size: 0.8rem;
+      text-align: center;
+      color: var(--muted, #5a6a78);
+    }
+    .preset-card.none-card label {
+      border-style: dashed;
+      border-color: rgba(0,0,0,0.15);
+    }
+    .preset-card.none-card input[type="radio"]:checked + label {
+      border-color: var(--accent, #1a7f5a);
+      border-style: solid;
+    }
+    .upload-zone {
+      border: 2px dashed rgba(0,0,0,0.18);
+      border-radius: 10px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      color: var(--muted, #5a6a78);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+    .upload-zone:hover {
+      border-color: var(--accent, #1a7f5a);
+      background: rgba(26,127,90,0.04);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .upload-zone svg {
+      display: block;
+      margin: 0 auto 0.5rem;
+      opacity: 0.4;
+    }
+    .plan-lock-note {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      background: rgba(250,180,0,0.08);
+      border: 1px solid rgba(250,180,0,0.28);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.88rem;
+      color: #7a5800;
+      margin-bottom: 0.5rem;
+    }
+    .bg-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin: 1rem 0 0.5rem;
+    }
+    .bg-divider::before, .bg-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="shell-side">
+      <%- include('partials/side-nav', { active: null }) %>
+      <div class="side-foot">
+        <span class="status-pill"><%= plan.name %></span>
+        <div style="margin-top:0.55rem"><%= user.global_name || user.username %></div>
+      </div>
+    </aside>
+    <div class="shell-main">
+      <header class="shell-top">
+        <strong style="font-family:var(--display)">Level settings</strong>
+        <a class="btn ghost small" href="/guild/<%= guild.id %>">Terug naar desk</a>
+      </header>
+      <main class="shell-content">
+        <% if (flash === 'saved') { %><p class="ok-banner">Achtergrond opgeslagen.</p><% } %>
+        <% if (flash === 'bad_url') { %><p class="err-banner">Gebruik een geldige URL (http/https).</p><% } %>
+        <% if (flash === 'bad_file') { %><p class="err-banner">Ongeldig bestand. Gebruik png/jpg/webp/gif (max 4 MB).</p><% } %>
+        <% if (flash === 'plan_locked' || !enabled) { %>
+          <p class="err-banner">Level systeem zit niet in <strong><%= plan.name %></strong>. Upgrade naar Desk of Estate.</p>
+        <% } %>
+        <div class="page-head">
+          <h1><%= guild.name %> · jouw level card</h1>
+          <p>Pad: <code>/leden/levels/<%= guild.id %></code></p>
+        </div>
+
+        <section class="panel">
+          <h2>Jouw progressie</h2>
+          <p class="muted">Level <strong><%= progress.level %></strong> · <strong><%= progress.current %>/<%= progress.needed %> XP</strong> · totaal <strong><%= progress.total %> XP</strong>.</p>
+          <p class="muted">Verdien XP door berichten in deze server te sturen (max 1x per minuut, anti-spam).</p>
+        </section>
+
+        <% if (isPaid) { %>
+        <section class="panel">
+          <h2>⚡ XP-vermenigvuldiger <% if (!features.xpMultiplier) { %><span class="plan-badge">Estate</span><% } %></h2>
+          <p class="muted">Verhoog de XP die leden verdienen per bericht. Standaard is 1× (normaal). Max is 5×.</p>
+          <% if (features.xpMultiplier) { %>
+          <form method="post" action="/leden/levels/<%= guild.id %>/settings" class="form-grid">
+            <label>XP-vermenigvuldiger
+              <input type="number" name="xp_multiplier" min="1" max="5" step="0.1"
+                     value="<%= settings.xp_multiplier || 1 %>" style="width:7rem" />
+            </label>
+            <div class="cta-row full">
+              <button class="btn" type="submit">Opslaan</button>
+            </div>
+          </form>
+          <% } else { %>
+          <div class="plan-lock-note" style="margin-top:0.5rem">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            XP-vermenigvuldiger is exclusief voor <strong>Estate</strong>. <a href="/account">Upgrade →</a>
+          </div>
+          <% } %>
+        </section>
+
+        <section class="panel">
+          <h2>🤖 Bot-status tekst <span class="plan-badge">Estate</span></h2>
+          <p class="muted">Stel een eigen status in die de bot toont op deze server (bijv. "Tickets open · 🎮"). Estate only.</p>
+          <% if (features.customBotStatus) { %>
+          <form method="post" action="/leden/levels/<%= guild.id %>/settings" class="form-grid">
+            <label class="full">Status tekst
+              <input type="text" name="bot_status_text" maxlength="128"
+                     value="<%= settings.bot_status_text || '' %>"
+                     placeholder="bijv. Tickets open · 🎮" />
+            </label>
+            <div class="cta-row full">
+              <button class="btn" type="submit">Opslaan</button>
+            </div>
+          </form>
+          <% } else { %>
+          <div class="plan-lock-note" style="margin-top:0.5rem">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Bot-status is exclusief voor <strong>Estate</strong>. <a href="/account">Upgrade →</a>
+          </div>
+          <% } %>
+        </section>
+        <% } %>
+
+        <section class="panel">
+          <h2>Achtergrond voor /level en !level</h2>
+          <p class="muted">Kies een standaard achtergrond of stel een eigen in. Upload is exclusief voor Desk- en Estate-leden.</p>
+
+          <form method="post" action="/leden/levels/<%= guild.id %>" enctype="multipart/form-data" class="form-grid" id="bg-form">
+
+            <%
+              const currentVal = profile.background_url || '';
+              const isPreset = currentVal.startsWith('preset:');
+              const isNone   = currentVal === '';
+              const isCustom = !isPreset && !isNone;
+            %>
+
+            <div class="full">
+              <p style="font-weight:600;margin-bottom:0.4rem">Standaard achtergronden</p>
+              <div class="preset-grid">
+                <div class="preset-card none-card">
+                  <input type="radio" name="preset" id="preset-none" value="" <%= isNone ? 'checked' : '' %> />
+                  <label for="preset-none">
+                    <div class="preset-swatch" style="background:repeating-conic-gradient(#e2e8f0 0% 25%,#fff 0% 50%) 0 0/20px 20px;"></div>
+                    <span class="preset-name">Geen (standaard)</span>
+                  </label>
+                </div>
+                <% presets.forEach(function(p, i) { %>
+                  <div class="preset-card">
+                    <input type="radio" name="preset" id="preset-<%= i %>" value="<%= p.value %>" <%= currentVal === p.value ? 'checked' : '' %> />
+                    <label for="preset-<%= i %>">
+                      <div class="preset-swatch" style="background:<%= p.css %>"></div>
+                      <span class="preset-name"><%= p.label %></span>
+                    </label>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+
+            <div class="bg-divider full">of eigen URL</div>
+
+            <label class="full">Eigen achtergrond-URL
+              <input name="background_url" id="bg-url" value="<%= isCustom ? currentVal : '' %>"
+                     placeholder="https://example.com/background.png" maxlength="500"
+                     <%= enabled ? '' : 'disabled' %> />
+            </label>
+
+            <% if (isPaid) { %>
+              <div class="bg-divider full">of upload een afbeelding</div>
+              <div class="full">
+                <div class="upload-zone" id="upload-zone">
+                  <input type="file" name="background_file" accept="image/png,image/jpeg,image/webp,image/gif" id="bg-file" />
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <span id="upload-label">Sleep hier of klik om te uploaden (max 4 MB)</span>
+                </div>
+              </div>
+            <% } else { %>
+              <div class="bg-divider full">of upload een afbeelding</div>
+              <div class="full">
+                <div class="plan-lock-note">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Uploaden is alleen beschikbaar voor <strong>Desk</strong> en <strong>Estate</strong>. <a href="/account">Upgrade →</a>
+                </div>
+              </div>
+            <% } %>
+
+            <div class="cta-row full">
+              <button class="btn" type="submit" <%= enabled ? '' : 'disabled' %>>Opslaan</button>
+              <a class="btn ghost" href="/leden/levels/<%= guild.id %>">Reset form</a>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script>
+    // When a preset is picked, clear the URL field (they override each other)
+    document.querySelectorAll('input[name="preset"]').forEach(function(r) {
+      r.addEventListener('change', function() {
+        var urlField = document.getElementById('bg-url');
+        if (urlField) urlField.value = '';
+        var fileField = document.getElementById('bg-file');
+        if (fileField) fileField.value = '';
+        var lbl = document.getElementById('upload-label');
+        if (lbl) lbl.textContent = 'Sleep hier of klik om te uploaden (max 4 MB)';
+      });
+    });
+
+    // When URL is typed, uncheck preset
+    var bgUrl = document.getElementById('bg-url');
+    if (bgUrl) {
+      bgUrl.addEventListener('input', function() {
+        if (this.value.trim()) {
+          document.querySelectorAll('input[name="preset"]').forEach(function(r) { r.checked = false; });
+          var noneRadio = document.getElementById('preset-none');
+          if (noneRadio) noneRadio.checked = true;
+        }
+      });
+    }
+
+    // File upload label update
+    var bgFile = document.getElementById('bg-file');
+    if (bgFile) {
+      bgFile.addEventListener('change', function() {
+        var lbl = document.getElementById('upload-label');
+        if (lbl) lbl.textContent = this.files[0] ? this.files[0].name : 'Sleep hier of klik om te uploaden (max 4 MB)';
+        // Clear preset + URL when file selected
+        if (this.files[0]) {
+          document.querySelectorAll('input[name="preset"]').forEach(function(r) { r.checked = false; });
+          var noneRadio = document.getElementById('preset-none');
+          if (noneRadio) noneRadio.checked = true;
+          var urlField = document.getElementById('bg-url');
+          if (urlField) urlField.value = '';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

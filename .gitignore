@@ -1,0 +1,10 @@
+node_modules/
+.env
+.cursor/
+data/
+*.db
+*.sqlite
+*.sqlite3
+.DS_Store
+npm-debug.log*
+transcripts/

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title %> · Reedhall</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="shell-side">
+      <%- include('partials/side-nav', { active: 'status' }) %>
+      <div class="side-foot">
+        <span class="status-pill"><%= botOnline ? 'Bot online' : 'Bot offline' %></span>
+        <div style="margin-top:0.55rem"><%= user.global_name || user.username %></div>
+      </div>
+    </aside>
+    <div class="shell-main">
+      <header class="shell-top">
+        <strong style="font-family:var(--display)">Server status</strong>
+        <a class="btn ghost small" href="/logout">Log out</a>
+      </header>
+      <main class="shell-content">
+        <% if (mode === 'picker') { %>
+          <div class="page-head">
+            <h1>Your servers</h1>
+            <p>Pick a linked server to see health, tickets, and recent activity.</p>
+          </div>
+          <% if (!guilds.length) { %>
+            <section class="panel">
+              <p class="muted">No servers linked yet.</p>
+              <a class="btn" href="/servers">Link a server</a>
+            </section>
+          <% } else { %>
+            <section class="panel">
+              <ul class="status-guild-list">
+                <% guilds.forEach(function(g) { %>
+                  <li>
+                    <a href="/status/<%= g.id %>">
+                      <strong><%= g.name %></strong>
+                      <span class="muted">Open status →</span>
+                    </a>
+                  </li>
+                <% }) %>
+              </ul>
+            </section>
+          <% } %>
+        <% } else { %>
+          <div class="page-head">
+            <h1><%= guild.name %></h1>
+            <p>Health checks, tickets, and recent moderation for this server only.</p>
+          </div>
+
+          <% if (guilds.length > 1) { %>
+            <p class="muted" style="margin-top:-0.5rem;margin-bottom:1rem">
+              Switch:
+              <% guilds.forEach(function(g, i) { %>
+                <a href="/status/<%= g.id %>"<%= g.id === guild.id ? ' style="font-weight:700"' : '' %>><%= g.name %></a><%= i < guilds.length - 1 ? ' · ' : '' %>
+              <% }) %>
+            </p>
+          <% } %>
+
+          <section class="metric-row">
+            <div class="metric"><strong><%= botOnline ? 'Online' : 'Offline' %></strong><span>Bot</span></div>
+            <div class="metric"><strong><%= guild.botIn ? 'Yes' : 'No' %></strong><span>In server</span></div>
+            <div class="metric"><strong><%= guild.memberCount != null ? guild.memberCount : '—' %></strong><span>Members</span></div>
+            <div class="metric"><strong><%= ping %>ms</strong><span>Websocket</span></div>
+          </section>
+
+          <section class="metric-row">
+            <div class="metric"><strong><%= health.openTickets %></strong><span>Open tickets</span></div>
+            <div class="metric"><strong><%= health.closedTickets %></strong><span>Closed tickets</span></div>
+            <div class="metric"><strong><%= health.activeWarnings %></strong><span>Active warns</span></div>
+            <div class="metric"><strong><%= health.modActions24h %></strong><span>Mod actions (24h)</span></div>
+          </section>
+
+          <section class="panel">
+            <h2>Health checks</h2>
+            <ul class="status-checks">
+              <% checks.forEach(function(c) { %>
+                <li class="<%= c.ok ? 'ok' : 'warn' %>">
+                  <strong><%= c.ok ? 'OK' : 'Needs attention' %></strong>
+                  <span><%= c.label %></span>
+                  <p class="muted"><%= c.detail %></p>
+                </li>
+              <% }) %>
+            </ul>
+            <p class="muted" style="margin-top:0.75rem">
+              Active polls: <strong><%= health.activePolls %></strong> ·
+              Giveaways: <strong><%= health.activeGiveaways %></strong> ·
+              Disabled commands: <strong><%= health.disabledCommands %></strong>
+            </p>
+            <div class="cta-row" style="margin-top:1rem">
+              <a class="btn" href="/guild/<%= guild.id %>">Open panel</a>
+              <a class="btn ghost" href="/status">All servers</a>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Recent tickets</h2>
+            <% if (!health.recentTickets.length) { %>
+              <p class="muted">No tickets yet.</p>
+            <% } else { %>
+              <table>
+                <thead><tr><th>#</th><th>Status</th><th>Opener</th><th>Created</th></tr></thead>
+                <tbody>
+                  <% health.recentTickets.forEach(function(t) { %>
+                    <tr>
+                      <td><code>#<%= t.ticket_number %></code></td>
+                      <td><%= t.status %></td>
+                      <td><code><%= t.opener_id %></code></td>
+                      <td class="muted"><%= t.created_at %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            <% } %>
+          </section>
+
+          <section class="panel">
+            <h2>Recent moderation</h2>
+            <% if (!health.recentActions.length) { %>
+              <p class="muted">No moderation actions logged yet.</p>
+            <% } else { %>
+              <table>
+                <thead><tr><th>Action</th><th>Target</th><th>By</th><th>When</th></tr></thead>
+                <tbody>
+                  <% health.recentActions.forEach(function(a) { %>
+                    <tr>
+                      <td><code><%= a.action %></code></td>
+                      <td><code><%= a.target_id %></code></td>
+                      <td><code><%= a.moderator_id %></code></td>
+                      <td class="muted"><%= a.created_at %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            <% } %>
+          </section>
+        <% } %>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy · Reedhall</title>
+  <meta name="description" content="Privacybeleid van Reedhall — wat we opslaan en waarom." />
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="landing">
+  <header class="topbar">
+    <a class="brand" href="/"><img class="brand-logo" src="/logo.png" alt="" />Reedhall</a>
+    <nav>
+      <a href="/" class="nav-link">Home</a>
+      <a href="/help" class="nav-link">Help</a>
+      <% if (loggedIn) { %>
+        <a class="btn ghost" href="/dashboard">Dashboard</a>
+      <% } else { %>
+        <a class="btn" href="/login">Log in</a>
+      <% } %>
+    </nav>
+  </header>
+
+  <main class="help-solo">
+    <header class="shell-top" style="margin:0 0 1.25rem;border-radius:var(--radius)">
+      <strong style="font-family:var(--display)">Privacy</strong>
+    </header>
+
+    <section class="panel">
+      <h2>Wie we zijn</h2>
+      <p>Reedhall is een Discord staff desk (tickets, moderatie, polls, giveaways en een webpanel). Dit beleid geldt voor de bot en het dashboard op deze installatie.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Welke gegevens</h2>
+      <ul>
+        <li><strong>Discord-account</strong> — user ID, gebruikersnaam, avatar, en servers die je mag beheren (via Discord OAuth bij login).</li>
+        <li><strong>Servergegevens</strong> — gekoppelde guilds, kanalen/rollen, ticketconfig, branding, staff-lijsten.</li>
+        <li><strong>Tickets &amp; moderatie</strong> — ticketberichten/metadata, warns, mod-acties.</li>
+        <li><strong>Supportchat</strong> — berichten in <code>/support</code>.</li>
+        <li><strong>Technisch</strong> — sessiecookies voor login, IP/browser voor beveiliging, rate limits, CAPTCHA, optionele error-reports.</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Waarom</h2>
+      <ul>
+        <li>Dashboard en botfuncties laten werken</li>
+        <li>Toegang beveiligen (login, CAPTCHA, rate limits)</li>
+        <li>Supportvragen afhandelen</li>
+        <li>Plan/serverlimieten toepassen</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Delen</h2>
+      <p>We verkopen je data niet. Discord ontvangt OAuth-verzoeken bij login. Error-reports die jij verstuurt kunnen naar een privé admin-webhook gaan.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Jouw keuzes</h2>
+      <ul>
+        <li>Ontkoppel servers in het dashboard</li>
+        <li>Log uit; sessiecookies verlopen automatisch</li>
+        <li>Vraag via <a href="/support">Support</a> om dataverwijdering waar mogelijk</li>
+      </ul>
+    </section>
+
+    <p class="muted">Laatst bijgewerkt: augustus 2026 · <a href="/help">Help</a> · <a href="/">Home</a></p>
+  </main>
+
+  <footer class="site-foot">
+    <span>Reedhall</span>
+    <span><a href="/privacy">Privacy</a> · <a href="/help">Help</a></span>
+  </footer>
+</body>
+</html>

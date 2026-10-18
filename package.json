@@ -1,0 +1,28 @@
+{
+  "name": "reedhall",
+  "version": "1.0.0",
+  "description": "Reedhall — Discord staff desk with tickets, moderation, polls and dashboard",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "deploy": "node src/deploy-commands.js",
+    "dev": "node --watch-path=src --watch src/index.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.7",
+    "cookie-parser": "^1.4.7",
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.6.1",
+    "express-session": "^1.18.1",
+    "helmet": "^8.3.0",
+    "ms": "^2.1.3",
+    "multer": "^2.2.0"
+  }
+}

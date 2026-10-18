@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title %> · Reedhall</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="<%= user ? '/dashboard' : '/' %>"><img class="brand-logo" src="/logo.png" alt="" />Reedhall</a>
+    <nav>
+      <% if (user) { %>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/servers">Servers</a>
+        <span class="user"><%= user.global_name || user.username %></span>
+        <a class="btn ghost" href="/logout">Uitloggen</a>
+      <% } else { %>
+        <a class="btn" href="/login">Inloggen met Discord</a>
+      <% } %>
+    </nav>
+  </header>
+  <main class="container">
+    <%- body %>
+  </main>
+</body>
+</html>

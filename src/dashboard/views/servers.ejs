@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Servers · Reedhall</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="shell-side">
+      <%- include('partials/side-nav', { active: 'servers' }) %>
+      <div class="side-foot">
+        <span class="status-pill"><%= plan.name %> · <%= usedServers %>/<%= plan.maxServers == null ? '∞' : plan.maxServers %></span>
+        <div style="margin-top:0.55rem"><%= user.global_name || user.username %></div>
+      </div>
+    </aside>
+
+    <div class="shell-main">
+      <header class="shell-top">
+        <strong style="font-family:var(--display)">Servers koppelen</strong>
+        <div style="display:flex;gap:0.75rem;align-items:center">
+          <a class="btn ghost small" href="/logout">Uitloggen</a>
+        </div>
+      </header>
+
+      <main class="shell-content">
+        <div class="page-head">
+          <h1>Jouw Discord-servers</h1>
+          <p>Stappen: <strong>1. Koppelen</strong> → <strong>2. Bot uitnodigen</strong> → <strong>3. Desk openen</strong>. “Admin” hier betekent Discord-beheerder, niet Reedhall-admin.</p>
+        </div>
+
+        <% if (flash === 'linked') { %><p class="ok-banner">Server gekoppeld. Nodig de bot nu uit als dat nog nodig is.</p><% } %>
+        <% if (flash === 'unlinked') { %><p class="ok-banner">Server ontkoppeld.</p><% } %>
+        <% if (flash === 'limit') { %>
+          <p class="err-banner">Je <strong><%= plan.name %></strong>-plan laat max <%= plan.maxServers %> server(s) toe. <a href="/account">Upgrade</a> of ontkoppel een server.</p>
+        <% } %>
+        <% if (flash === 'invite') { %>
+          <p class="ok-banner">Gekoppeld! Klik nu op <strong>Bot uitnodigen</strong> zodat Reedhall in de server komt.</p>
+        <% } %>
+        <% if (!servers.length) { %>
+          <div class="panel">
+            <p class="muted" style="margin:0">Geen servers gevonden waar jij Discord owner/admin bent. Log opnieuw in of maak eerst een Discord-server.</p>
+          </div>
+        <% } else { %>
+          <div class="guild-list">
+            <% servers.forEach(function(s) { %>
+              <div class="guild-row connect-row">
+                <% if (s.icon) { %>
+                  <img src="https://cdn.discordapp.com/icons/<%= s.id %>/<%= s.icon %>.png?size=64" alt="" />
+                <% } else { %>
+                  <div class="guild-fallback"><%= s.name.slice(0,1).toUpperCase() %></div>
+                <% } %>
+                <div>
+                  <strong><%= s.name %></strong>
+                  <span>
+                    Discord: <%= s.owner ? 'Owner' : 'Beheerder' %>
+                    · Reedhall: <%= s.linked ? 'Gekoppeld' : 'Nog niet gekoppeld' %>
+                    <% if (s.linked && s.linkedByMe) { %> · telt mee in jouw plan<% } %>
+                    · Bot: <%= s.botIn ? 'Aanwezig' : 'Nog uitnodigen' %>
+                  </span>
+                  <% if (!s.linked) { %>
+                    <span class="muted" style="display:block;margin-top:0.25rem">Volgende stap: klik <strong>Koppelen</strong></span>
+                  <% } else if (!s.botIn) { %>
+                    <span class="muted" style="display:block;margin-top:0.25rem">Volgende stap: klik <strong>Bot uitnodigen</strong></span>
+                  <% } else { %>
+                    <span class="muted" style="display:block;margin-top:0.25rem">Klaar — open de desk</span>
+                  <% } %>
+                </div>
+                <div class="connect-actions">
+                  <% if (!s.linked) { %>
+                    <form method="post" action="/servers/<%= s.id %>/link">
+                      <button class="btn small" type="submit">Koppelen</button>
+                    </form>
+                  <% } else { %>
+                    <% if (!s.botIn) { %>
+                      <a class="btn small" href="<%= s.inviteUrl %>" target="_blank" rel="noopener">Bot uitnodigen</a>
+                    <% } else { %>
+                      <a class="btn ghost small" href="/guild/<%= s.id %>">Open desk</a>
+                    <% } %>
+                    <form method="post" action="/servers/<%= s.id %>/unlink">
+                      <button class="btn ghost small" type="submit">Ontkoppelen</button>
+                    </form>
+                  <% } %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </main>
+    </div>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

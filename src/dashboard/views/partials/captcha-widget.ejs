@@ -1,0 +1,31 @@
+<input type="hidden" name="captcha_token" class="rh-captcha-token-field" value="" autocomplete="off" />
+<div
+  class="captcha-is"
+  data-sitekey="<%= typeof captchaIsSitekey !== 'undefined' && captchaIsSitekey ? captchaIsSitekey : 'pk_image' %>"
+  data-mode="image"
+  data-response-field="captcha_token"
+  data-callback="onReedhallCaptcha"
+></div>
+<script nonce="<%= cspNonce %>" src="/captcha-is/api.js?v=6" defer></script>
+<script nonce="<%= cspNonce %>">
+(function () {
+  if (window.__reedhallCaptchaCb) return;
+  window.__reedhallCaptchaCb = true;
+  window.onReedhallCaptcha = function (token) {
+    document.querySelectorAll('.rh-captcha-token-field, #rh-captcha-token').forEach(function (el) {
+      el.value = token || '';
+    });
+    var btn = document.getElementById('discord-login-btn');
+    if (btn) btn.disabled = !token;
+    var hint = document.getElementById('rh-captcha-hint');
+    if (hint) {
+      hint.textContent = token
+        ? 'You are human — you can continue with Discord.'
+        : 'Complete the captcha to enable Discord login.';
+    }
+    if (typeof window.onReedhallCaptchaExtra === 'function') {
+      window.onReedhallCaptchaExtra(token);
+    }
+  };
+})();
+</script>

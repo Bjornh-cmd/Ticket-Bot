@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Overzicht · Reedhall</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="shell-side">
+      <a class="brand" href="/dashboard"><img class="brand-logo" src="/logo.png" alt="" />Reedhall</a>
+      <nav class="side-nav">
+        <a class="active" href="/dashboard">Overview</a>
+        <a href="/servers">Servers</a>
+        <a href="/account">Plan</a>
+        <a href="/support">Support</a>
+        <a href="/commands">Commands</a>
+        <a href="/status">Server status</a>
+        <a href="/help">Help</a>
+        <% guilds.slice(0, 6).forEach(function(g) { %>
+          <a href="/guild/<%= g.id %>"><%= g.name %></a>
+        <% }) %>
+      </nav>
+      <div class="side-foot">
+        <span class="status-pill"><%= plan.name %> · <%= usedServers %>/<%= plan.maxServers == null ? '∞' : plan.maxServers %></span>
+        <div style="margin-top:0.55rem"><%= user.global_name || user.username %></div>
+      </div>
+    </aside>
+
+    <div class="shell-main">
+      <header class="shell-top">
+        <strong style="font-family:var(--display)">Control room</strong>
+        <div style="display:flex;gap:0.75rem;align-items:center">
+          <a class="btn ghost small" href="/servers">+ Server</a>
+          <a class="btn ghost small" href="/logout">Uitloggen</a>
+        </div>
+      </header>
+
+      <main class="shell-content">
+        <div class="page-head">
+          <h1>Welkom terug</h1>
+          <p>Plan: <strong><%= plan.name %></strong> (<%= usedServers %>/<%= plan.maxServers == null ? '∞' : plan.maxServers %> servers). <a href="/account">Beheer plan</a></p>
+        </div>
+
+        <section class="quick-actions">
+          <a class="quick-card" href="/servers"><strong>Servers</strong><span>Koppelen of desk openen</span></a>
+          <a class="quick-card" href="/support"><strong>Support</strong><span>Chat met Reedhall</span></a>
+          <a class="quick-card" href="/status"><strong>Status</strong><span>Health per server</span></a>
+          <a class="quick-card" href="/commands"><strong>Commands</strong><span>Slash-command lijst</span></a>
+        </section>
+
+        <section class="metric-row">
+          <div class="metric"><strong><%= stats.ticketsOpen %></strong><span>Open tickets</span></div>
+          <div class="metric"><strong><%= stats.ticketsTotal %></strong><span>Tickets totaal</span></div>
+          <div class="metric"><strong><%= stats.warns %></strong><span>Actieve warns</span></div>
+          <div class="metric"><strong><%= stats.actions %></strong><span>Mod acties</span></div>
+        </section>
+        <p class="muted" style="margin-top:-0.35rem;margin-bottom:1rem">Cijfers van jouw gekoppelde / beheerde servers.</p>
+
+        <div style="display:flex;justify-content:space-between;align-items:end;gap:1rem;margin-bottom:0.85rem">
+          <h2 class="section-title" style="margin:0">Gekoppelde servers</h2>
+          <a class="btn small" href="/servers">Server koppelen</a>
+        </div>
+
+        <% if (!guilds.length) { %>
+          <div class="panel">
+            <p class="muted" style="margin:0 0 1rem">Nog geen actieve desk. Koppel een server waar jij owner of admin bent — zonder IDs in te vullen.</p>
+            <a class="btn" href="/servers">Naar servers koppelen</a>
+          </div>
+        <% } else { %>
+          <div class="guild-list">
+            <% guilds.forEach(function(g) { %>
+              <a class="guild-row" href="/guild/<%= g.id %>">
+                <% if (g.icon) { %>
+                  <img src="https://cdn.discordapp.com/icons/<%= g.id %>/<%= g.icon %>.png?size=64" alt="" />
+                <% } else { %>
+                  <div class="guild-fallback"><%= g.name.slice(0,1).toUpperCase() %></div>
+                <% } %>
+                <div>
+                  <strong><%= g.name %></strong>
+                  <span><%= g.access === 'owner' ? 'Owner-toegang' : 'Staff-toegang' %> · Instellingen · tickets · polls</span>
+                </div>
+                <span class="chev">→</span>
+              </a>
+            <% }) %>
+          </div>
+        <% } %>
+
+        <section class="panel" style="margin-top:1.25rem">
+          <h2>Recente tickets</h2>
+          <% if (!recentTickets || !recentTickets.length) { %>
+            <p class="muted" style="margin:0">Nog geen tickets op jouw servers.</p>
+          <% } else { %>
+            <table>
+              <thead><tr><th>#</th><th>Server</th><th>Onderwerp</th><th>Status</th><th>Datum</th><th></th></tr></thead>
+              <tbody>
+                <% recentTickets.forEach(function(t) { %>
+                  <tr>
+                    <td><%= t.ticket_number || t.id %></td>
+                    <td><%= (guildNameById && guildNameById[String(t.guild_id)]) || t.guild_id %></td>
+                    <td><%= t.subject || '—' %></td>
+                    <td><span class="badge <%= t.status %>"><%= t.status %></span></td>
+                    <td><%= t.created_at %></td>
+                    <td><a class="btn ghost small" href="/guild/<%= t.guild_id %>#tickets">Open</a></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          <% } %>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

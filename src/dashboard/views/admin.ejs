@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reedhall Admin</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/admin.css" />
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <aside class="admin-side">
+      <div class="admin-brand">
+        <img src="/logo.png" alt="" />
+        <div>
+          <strong>Reedhall Admin</strong>
+          <span>Platform console</span>
+        </div>
+      </div>
+      <nav class="admin-nav">
+        <a class="<%= tab === 'overview' ? 'active' : '' %>" href="/admin?tab=overview">Overview</a>
+        <a class="<%= tab === 'support' ? 'active' : '' %>" href="/admin?tab=support">Support<%= stats.supportOpen ? ` (${stats.supportOpen})` : '' %></a>
+        <a class="<%= tab === 'security' ? 'active' : '' %>" href="/admin?tab=security">Security / Captcha</a>
+        <a class="<%= tab === 'plans' ? 'active' : '' %>" href="/admin?tab=plans">Plans &amp; features</a>
+        <a class="<%= tab === 'link' ? 'active' : '' %>" href="/admin?tab=link">Link-login</a>
+        <a class="<%= tab === 'users' ? 'active' : '' %>" href="/admin?tab=users">Users</a>
+        <a class="<%= tab === 'roles' ? 'active' : '' %>" href="/admin?tab=roles">Discord roles</a>
+        <a class="<%= tab === 'guilds' ? 'active' : '' %>" href="/admin?tab=guilds">Servers</a>
+      </nav>
+      <div class="admin-side-foot">
+        <div><%= user.username %></div>
+        <a href="/dashboard">← Terug naar desk</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-top">
+        <h1>
+          <% if (tab === 'plans') { %>Plans → features
+          <% } else if (tab === 'link') { %>Link-login
+          <% } else if (tab === 'users') { %>Users &amp; plans
+          <% } else if (tab === 'roles') { %>Discord roles → functions
+          <% } else if (tab === 'guilds') { %>Servers
+          <% } else if (tab === 'support') { %>Support inbox
+          <% } else if (tab === 'security') { %>Security / Captcha
+          <% } else { %>Overview<% } %>
+        </h1>
+        <a class="btn ghost small" href="/logout">Uitloggen</a>
+      </header>
+
+      <% if (flash === 'saved') { %><p class="ok-banner">Opgeslagen.</p><% } %>
+      <% if (flash === 'plans_saved') { %><p class="ok-banner">Plan-functies opgeslagen. Lobby / Desk / Estate zijn bijgewerkt.</p><% } %>
+      <% if (flash === 'link_saved') { %><p class="ok-banner">Link-login opgeslagen.</p><% } %>
+      <% if (flash === 'roles_saved') { %><p class="ok-banner">Discord rol-rechten opgeslagen.</p><% } %>
+      <% if (flash === 'unlinked') { %><p class="ok-banner">Server ontkoppeld.</p><% } %>
+      <% if (flash === 'missing') { %><p class="err-banner">User ID verplicht.</p><% } %>
+      <% if (flash === 'invalid_id') { %><p class="err-banner">Ongeldige Discord user ID. Gebruik alleen cijfers (rechtermuisklik op user → ID kopiëren).</p><% } %>
+      <% if (flash === 'bad_guild') { %><p class="err-banner">Ongeldige server.</p><% } %>
+      <% if (flash === 'support_replied') { %><p class="ok-banner">Reply sent.</p><% } %>
+      <% if (flash === 'support_closed') { %><p class="ok-banner">Chat closed.</p><% } %>
+      <% if (flash === 'support_deleted') { %><p class="ok-banner">Support ticket closed and permanently deleted.</p><% } %>
+      <% if (flash === 'support_reopened') { %><p class="ok-banner">Chat reopened.</p><% } %>
+      <% if (flash === 'empty') { %><p class="err-banner">Message required.</p><% } %>
+
+      <% if (tab === 'overview') { %>
+        <section class="metric-row">
+          <div class="metric"><strong><%= stats.accounts %></strong><span>Accounts</span></div>
+          <div class="metric"><strong><%= stats.linked %></strong><span>Servers</span></div>
+          <div class="metric"><strong><%= stats.supportOpen %></strong><span>Open support</span></div>
+          <div class="metric"><strong><%= stats.tickets %></strong><span>Tickets</span></div>
+        </section>
+        <section class="panel">
+          <h2>Admin console</h2>
+          <ul>
+            <li><strong>Support</strong> — reply to user chats from <code>/support</code></li>
+            <li><strong>Security / Captcha</strong> — Captcha is (stoplichten) self-hosted image CAPTCHA</li>
+            <li><strong>Plans &amp; features</strong> — what Lobby / Desk / Estate may use</li>
+            <li><strong>Users</strong> — assign plans to Discord accounts</li>
+            <li><strong>Discord roles</strong> — per-server role → bot function map</li>
+          </ul>
+        </section>
+      <% } %>
+
+      <% if (tab === 'security') { %>
+        <section class="panel">
+          <h2>Captcha is (stoplichten)</h2>
+          <p class="muted">Self-hosted image CAPTCHA mounted at <code>/captcha-is</code> on this same Node process (no external captcha host). Protects login, link-login, and error reports.</p>
+          <p>Status:
+            <% if (typeof captchaStatus !== 'undefined' && captchaStatus && captchaStatus.provider === 'captcha-is') { %>
+              <span class="ok-banner" style="display:inline-block;margin:0">Captcha is ready</span>
+            <% } else if (captchaReady || capReady) { %>
+              <span class="ok-banner" style="display:inline-block;margin:0">Fallback Guard ready</span>
+            <% } else { %>
+              <span class="err-banner" style="display:inline-block;margin:0">Missing CAPTCHA_IS_* secrets</span>
+            <% } %>
+          </p>
+          <ul>
+            <li>Set <code>CAPTCHA_IS_SIGNING_SECRET</code>, <code>CAPTCHA_IS_SECRET</code>, <code>CAPTCHA_IS_SITEKEY</code>, <code>CAPTCHA_IS_DOMAINS</code> in <code>.env</code>.</li>
+            <li>Widget: <code>/captcha-is/api.js</code> · photos: <code>/captcha-is/challenges/…</code></li>
+            <li>API: <code>POST /captcha-is/api/challenge</code> · <code>POST /captcha-is/api/solve</code></li>
+            <li>Form field: <code>captcha_token</code> (verified with <code>siteverify</code>)</li>
+            <% if (typeof captchaStatus !== 'undefined' && captchaStatus) { %>
+              <li>Provider: <code><%= captchaStatus.provider %></code><% if (captchaStatus.sitekey) { %> · sitekey <code><%= captchaStatus.sitekey %></code><% } %></li>
+            <% } %>
+          </ul>
+        </section>
+      <% } %>
+
+      <% if (tab === 'support') { %>
+        <div class="admin-support<%= supportActive ? ' has-user' : '' %>">
+          <section class="panel">
+            <h2>Inbox</h2>
+            <form method="get" action="/admin" class="admin-search" style="margin-bottom:0.85rem">
+              <input type="hidden" name="tab" value="support" />
+              <% if (supportActive) { %><input type="hidden" name="thread" value="<%= supportActive.id %>" /><% } %>
+              <input name="sq" value="<%= typeof supportSearch !== 'undefined' ? supportSearch : '' %>" placeholder="Search username, Discord ID, subject…" />
+              <button class="btn ghost small" type="submit">Search</button>
+              <% if (typeof supportSearch !== 'undefined' && supportSearch) { %>
+                <a class="btn ghost small" href="/admin?tab=support<%= supportActive ? '&thread=' + supportActive.id : '' %>">Clear</a>
+              <% } %>
+            </form>
+            <% if (!supportThreads.length) { %>
+              <p class="muted">No support chats yet.</p>
+            <% } else { %>
+              <ul class="support-thread-list">
+                <% supportThreads.forEach(function(t) { %>
+                  <li class="<%= supportActive && supportActive.id === t.id ? 'active' : '' %>">
+                    <a href="/admin?tab=support&thread=<%= t.id %><%= supportSearch ? '&sq=' + encodeURIComponent(supportSearch) : '' %>">
+                      <strong><%= t.subject %></strong>
+                      <span class="muted"><%= t.username || '—' %> · <code><%= t.user_id %></code> · <%= t.status %> · <%= t.updated_at %></span>
+                      <% if (t.last_message) { %><div class="muted" style="margin-top:0.25rem"><%= String(t.last_message).slice(0, 90) %></div><% } %>
+                    </a>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } %>
+          </section>
+          <section class="panel">
+            <% if (!supportActive) { %>
+              <h2>Conversation</h2>
+              <p class="muted">Select a chat on the left.</p>
+            <% } else { %>
+              <div class="support-head">
+                <div>
+                  <h2><%= supportActive.subject %></h2>
+                  <p class="muted">#<%= supportActive.id %> · <%= supportActive.status %> · <%= supportActive.updated_at %></p>
+                  <p>Discord user ID: <code class="admin-id"><%= supportActive.user_id %></code>
+                    <% if (supportActive.username) { %> · @<%= supportActive.username %><% } %>
+                  </p>
+                </div>
+                <div class="cta-row">
+                  <form method="post" action="/admin/support/<%= supportActive.id %>/close" onsubmit="return confirm('Close ticket and permanently delete this conversation?');">
+                    <button class="btn danger small" type="submit">Close ticket</button>
+                  </form>
+                </div>
+              </div>
+              <div class="support-chat">
+                <% supportMessages.forEach(function(m) { %>
+                  <div class="support-bubble <%= m.sender_type === 'admin' ? 'admin' : 'user' %>">
+                    <div class="support-meta"><%= m.sender_type === 'admin' ? 'Admin' : (m.sender_name || 'User') %> · <%= m.created_at %></div>
+                    <p><%= m.body %></p>
+                  </div>
+                <% }) %>
+              </div>
+              <form method="post" action="/admin/support/<%= supportActive.id %>/reply" class="stack-form" style="margin-top:1rem">
+                <textarea name="body" rows="4" maxlength="4000" required placeholder="Reply to user…"></textarea>
+                <button class="btn" type="submit">Send reply</button>
+              </form>
+            <% } %>
+          </section>
+          <% if (supportActive && supportUser) { %>
+            <section class="panel support-user-panel">
+              <h2>User · plan · servers</h2>
+              <dl class="admin-dl">
+                <div><dt>Username</dt><dd><%= supportUser.username || supportActive.username || '—' %></dd></div>
+                <div><dt>Discord user ID</dt><dd><code class="admin-id"><%= supportActive.user_id %></code></dd></div>
+                <div><dt>Plan</dt><dd><strong><%= supportUserPlan ? supportUserPlan.name : supportUser.plan %></strong> (<code><%= supportUser.plan %></code>)</dd></div>
+                <div><dt>Payment / price</dt><dd><%= supportUserPlan ? supportUserPlan.priceLabel : '—' %>
+                  <% if (supportUserPlan && supportUserPlan.monthlyPrice != null) { %>
+                    · €<%= Number(supportUserPlan.monthlyPrice).toFixed(2) %>/mo
+                  <% } %>
+                </dd></div>
+                <div><dt>Estate servers pack</dt><dd><%= supportUser.estate_servers %></dd></div>
+                <div><dt>Linked servers</dt><dd><%= typeof supportUserLinked !== 'undefined' ? supportUserLinked : 0 %>
+                  <% if (supportUserPlan && supportUserPlan.maxServers != null) { %>
+                    / <%= supportUserPlan.maxServers %>
+                  <% } else if (supportUserPlan) { %>
+                    / ∞
+                  <% } %>
+                </dd></div>
+                <div><dt>Max panel staff</dt><dd><%= supportUserPlan && supportUserPlan.maxPanelStaff != null ? supportUserPlan.maxPanelStaff : '∞' %></dd></div>
+                <div><dt>Account updated</dt><dd><%= supportUser.updated_at || '—' %></dd></div>
+                <div><dt>Thread created</dt><dd><%= supportActive.created_at %></dd></div>
+              </dl>
+
+              <% if (supportUserPlan && supportUserPlan.features) { %>
+                <h3 style="margin-top:1rem;font-size:0.95rem">Plan features</h3>
+                <ul class="admin-feature-list">
+                  <% featureKeys.forEach(function(f) { %>
+                    <li class="<%= supportUserPlan.features[f.key] ? 'on' : 'off' %>">
+                      <%= supportUserPlan.features[f.key] ? '✓' : '✗' %> <%= f.label || f.key %>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } %>
+
+              <h3 style="margin-top:1.1rem;font-size:0.95rem">Configure user</h3>
+              <form method="post" action="/admin/plan" class="form-grid">
+                <input type="hidden" name="user_id" value="<%= supportActive.user_id %>" />
+                <input type="hidden" name="return_to" value="/admin?tab=support&thread=<%= supportActive.id %>" />
+                <label>Username
+                  <input name="username" value="<%= supportUser.username || supportActive.username || '' %>" placeholder="discord username" />
+                </label>
+                <label>Plan
+                  <select name="plan">
+                    <option value="lobby" <%= supportUser.plan === 'lobby' ? 'selected' : '' %>>Lobby</option>
+                    <option value="desk" <%= supportUser.plan === 'desk' ? 'selected' : '' %>>Desk</option>
+                    <option value="estate" <%= supportUser.plan === 'estate' ? 'selected' : '' %>>Estate</option>
+                  </select>
+                </label>
+                <label>Estate servers
+                  <input type="number" name="estate_servers" min="1" max="500" value="<%= supportUser.estate_servers %>" />
+                </label>
+                <button class="btn" type="submit">Save user</button>
+              </form>
+
+              <h3 style="margin-top:1.1rem;font-size:0.95rem">Linked servers</h3>
+              <% if (!supportUserGuilds || !supportUserGuilds.length) { %>
+                <p class="muted">No linked servers for this user.</p>
+              <% } else { %>
+                <ul class="admin-guild-mini">
+                  <% supportUserGuilds.forEach(function(g) { %>
+                    <li>
+                      <strong><%= g.guild_name || 'Server' %></strong>
+                      <code><%= g.guild_id %></code>
+                      <a class="btn ghost small" href="/guild/<%= g.guild_id %>">Open</a>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } %>
+
+              <div class="cta-row" style="margin-top:1.25rem">
+                <a class="btn ghost small" href="/admin?tab=users&q=<%= encodeURIComponent(supportActive.user_id) %>">Open in Users</a>
+                <form method="post" action="/admin/support/<%= supportActive.id %>/close" onsubmit="return confirm('Close ticket and permanently delete this conversation?');">
+                  <button class="btn danger small" type="submit">Close ticket</button>
+                </form>
+              </div>
+            </section>
+          <% } %>
+        </div>
+      <% } %>
+
+      <% if (tab === 'plans') { %>
+        <section class="panel">
+          <h2>Functies per abonnement</h2>
+          <p class="muted">Vink aan wat elk plan mag. Dit geldt voor alle servers van users met dat plan.</p>
+          <form method="post" action="/admin/plans">
+            <div class="role-matrix-wrap">
+              <table class="role-matrix">
+                <thead>
+                  <tr>
+                    <th>Functie</th>
+                    <% planDefs.forEach(function(p) { %>
+                      <th><%= p.name %></th>
+                    <% }) %>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% featureKeys.forEach(function(f) { %>
+                    <tr>
+                      <td><strong><%= f.label %></strong><div class="muted"><code><%= f.key %></code></div></td>
+                      <% planDefs.forEach(function(p) { %>
+                        <td class="check-cell">
+                          <input type="checkbox" name="feat_<%= p.id %>__<%= f.key %>" value="1" <%= p.features[f.key] ? 'checked' : '' %> />
+                        </td>
+                      <% }) %>
+                    </tr>
+                  <% }) %>
+                  <tr>
+                    <td><strong>Max servers</strong><div class="muted">Estate = user kiest zelf</div></td>
+                    <% planDefs.forEach(function(p) { %>
+                      <td>
+                        <% if (p.id === 'estate') { %>
+                          <span class="muted">Custom</span>
+                          <input type="hidden" name="max_servers_<%= p.id %>" value="" />
+                        <% } else { %>
+                          <input type="number" name="max_servers_<%= p.id %>" min="1" max="500" value="<%= p.maxServers == null ? 1 : p.maxServers %>" style="width:5rem" />
+                        <% } %>
+                      </td>
+                    <% }) %>
+                  </tr>
+                  <tr>
+                    <td><strong>Max panel-mods</strong><div class="muted">leeg / unlimited = onbeperkt</div></td>
+                    <% planDefs.forEach(function(p) { %>
+                      <td>
+                        <% if (p.maxPanelStaff == null) { %>
+                          <input type="text" name="max_staff_<%= p.id %>" value="unlimited" style="width:6rem" />
+                        <% } else { %>
+                          <input type="number" name="max_staff_<%= p.id %>" min="0" max="999" value="<%= p.maxPanelStaff %>" style="width:5rem" />
+                        <% } %>
+                      </td>
+                    <% }) %>
+                  </tr>
+                  <tr>
+                    <td><strong>Prijs / label</strong></td>
+                    <% planDefs.forEach(function(p) { %>
+                      <td>
+                        <input type="number" name="price_<%= p.id %>" value="<%= p.monthlyPrice %>" style="width:5rem" title="Prijs" />
+                        <input type="text" name="price_label_<%= p.id %>" value="<%= p.priceLabel || '' %>" style="width:8rem;margin-top:0.35rem" />
+                        <input type="hidden" name="name_<%= p.id %>" value="<%= p.name %>" />
+                      </td>
+                    <% }) %>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <button class="btn" type="submit" style="margin-top:1rem">Plannen opslaan</button>
+          </form>
+        </section>
+      <% } %>
+
+      <% if (tab === 'link') { %>
+        <section class="panel">
+          <h2>Inloggen zonder Discord</h2>
+          <p class="muted">Maak een geheime URL + wachtwoord. Wie inlogt handelt als het gekoppelde Discord user-ID (plan &amp; servers).</p>
+          <form method="post" action="/admin/link-login" class="form-grid">
+            <label>
+              <span style="display:flex;align-items:center;gap:0.5rem;margin-top:1.2rem">
+                <input type="checkbox" name="enabled" value="1" <%= linkLogin.enabled ? 'checked' : '' %> />
+                Link-login aanzetten
+              </span>
+            </label>
+            <label>Pad (slug)
+              <input name="path_slug" value="<%= linkLogin.pathSlug %>" pattern="[A-Za-z0-9_-]+" required />
+            </label>
+            <label>Wachtwoord
+              <input type="password" name="password" placeholder="<%= linkLogin.hasPassword ? '•••••••• (laat leeg om te behouden)' : 'Nieuw wachtwoord' %>" <%= linkLogin.hasPassword ? '' : 'required' %> />
+            </label>
+            <label>Handelt als Discord user ID
+              <input name="user_id" value="<%= linkLogin.userId || '' %>" pattern="\d{15,22}" required placeholder="1230026055490998286" />
+            </label>
+            <label>Username label (optioneel)
+              <input name="username" placeholder="snubclient97465" />
+            </label>
+            <button class="btn" type="submit">Opslaan</button>
+          </form>
+          <% if (linkLogin.enabled) { %>
+            <p class="ok-banner" style="margin-top:1rem">
+              Login-URL: <code><%= dashboardUrl %>/l/<%= linkLogin.pathSlug %></code>
+            </p>
+          <% } %>
+        </section>
+      <% } %>
+
+      <% if (tab === 'roles') { %>
+        <section class="panel">
+          <h2>Server kiezen</h2>
+          <p class="muted">Per Discord-rol: welke bot-acties (kick, tickets, …). Los van abonnementen.</p>
+          <form method="get" action="/admin" class="form-grid">
+            <input type="hidden" name="tab" value="roles" />
+            <label>Server
+              <select name="guild" required onchange="this.form.submit()">
+                <option value="">— Kies server —</option>
+                <% guildOptions.forEach(function(g) { %>
+                  <option value="<%= g.id %>" <%= selectedGuild && selectedGuild.id === g.id ? 'selected' : '' %>><%= g.name %></option>
+                <% }) %>
+              </select>
+            </label>
+          </form>
+          <% if (!guildOptions.length) { %>
+            <p class="err-banner" style="margin-top:1rem">Nog geen server waar de bot in zit. Koppel + nodig de bot uit via Servers.</p>
+          <% } %>
+        </section>
+
+        <% if (selectedGuild) { %>
+          <section class="panel">
+            <h2>Rechten op <%= selectedGuild.name %></h2>
+            <form method="post" action="/admin/roles">
+              <input type="hidden" name="guild_id" value="<%= selectedGuild.id %>" />
+              <div class="role-matrix-wrap">
+                <table class="role-matrix">
+                  <thead>
+                    <tr>
+                      <th>Rol</th>
+                      <% roleFunctions.forEach(function(fn) { %>
+                        <th title="<%= fn.description %>"><%= fn.label %></th>
+                      <% }) %>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% roles.forEach(function(role) { %>
+                      <tr>
+                        <td>
+                          <input type="hidden" name="role_id" value="<%= role.id %>" />
+                          <strong style="color:<%= role.color !== '#000000' ? role.color : 'inherit' %>"><%= role.name %></strong>
+                        </td>
+                        <% roleFunctions.forEach(function(fn) { %>
+                          <td class="check-cell">
+                            <input type="checkbox" name="perm_<%= role.id %>__<%= fn.id %>" value="1" <%= (permMap[role.id] || []).includes(fn.id) ? 'checked' : '' %> />
+                          </td>
+                        <% }) %>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+              <button class="btn" type="submit" style="margin-top:1rem">Rechten opslaan</button>
+            </form>
+          </section>
+        <% } %>
+      <% } %>
+
+      <% if (tab === 'users') { %>
+        <section class="panel">
+          <h2>Plan aan een Discord-user geven</h2>
+          <form method="post" action="/admin/plan" class="form-grid" id="admin-plan-form">
+            <label>Discord user ID
+              <input name="user_id" id="admin-plan-user-id" required pattern="\d{15,22}" placeholder="Alleen cijfers, bijv. 1230026055490998286" />
+            </label>
+            <label>Username (optioneel)
+              <input name="username" id="admin-plan-username" placeholder="snubclient97465" />
+            </label>
+            <label>Plan
+              <select name="plan" id="admin-plan-select">
+                <option value="lobby">Lobby</option>
+                <option value="desk">Desk</option>
+                <option value="estate" selected>Estate</option>
+              </select>
+            </label>
+            <label>Estate servers
+              <input type="number" name="estate_servers" id="admin-plan-servers" min="1" max="500" value="10" />
+            </label>
+            <button class="btn" type="submit">Opslaan</button>
+          </form>
+        </section>
+        <section class="panel">
+          <div class="support-head" style="margin-bottom:0.85rem">
+            <h2 style="margin:0">Accounts</h2>
+            <form method="get" action="/admin" class="admin-search">
+              <input type="hidden" name="tab" value="users" />
+              <input name="q" value="<%= typeof userSearch !== 'undefined' ? userSearch : '' %>" placeholder="Zoek op username of Discord ID…" autofocus />
+              <button class="btn ghost small" type="submit">Zoeken</button>
+              <% if (typeof userSearch !== 'undefined' && userSearch) { %>
+                <a class="btn ghost small" href="/admin?tab=users">Wis</a>
+              <% } %>
+            </form>
+          </div>
+          <% if (typeof userSearch !== 'undefined' && userSearch) { %>
+            <p class="muted"><%= accounts.length %> resultaat<%= accounts.length === 1 ? '' : 'en' %> voor “<%= userSearch %>”</p>
+          <% } %>
+          <% if (!accounts.length) { %><p class="muted"><%= userSearch ? 'Geen accounts gevonden.' : 'Nog geen accounts.' %></p>
+          <% } else { %>
+            <table>
+              <thead><tr><th>Username</th><th>Discord user ID</th><th>Plan</th><th>Servers</th><th>Update</th><th></th></tr></thead>
+              <tbody>
+                <% accounts.forEach(function(a) { %>
+                  <tr>
+                    <td><%= a.username || '—' %></td>
+                    <td><code class="admin-id"><%= a.user_id %></code></td>
+                    <td><strong><%= a.plan %></strong></td>
+                    <td><%= a.estate_servers %></td>
+                    <td><%= a.updated_at %></td>
+                    <td>
+                      <button
+                        type="button"
+                        class="btn ghost small"
+                        data-fill-plan
+                        data-user-id="<%= a.user_id %>"
+                        data-username="<%= a.username || '' %>"
+                        data-plan="<%= a.plan %>"
+                        data-servers="<%= a.estate_servers %>"
+                      >Config</button>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          <% } %>
+        </section>
+        <script>
+          document.querySelectorAll('[data-fill-plan]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var id = document.getElementById('admin-plan-user-id');
+              var un = document.getElementById('admin-plan-username');
+              var pl = document.getElementById('admin-plan-select');
+              var sv = document.getElementById('admin-plan-servers');
+              if (id) id.value = btn.getAttribute('data-user-id') || '';
+              if (un) un.value = btn.getAttribute('data-username') || '';
+              if (pl) pl.value = btn.getAttribute('data-plan') || 'lobby';
+              if (sv) sv.value = btn.getAttribute('data-servers') || '10';
+              id && id.focus();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+          });
+        </script>
+      <% } %>
+
+      <% if (tab === 'guilds') { %>
+        <section class="panel">
+          <h2>Gekoppelde servers</h2>
+          <% if (!linked.length) { %><p class="muted">Geen.</p>
+          <% } else { %>
+            <table>
+              <thead><tr><th>Guild</th><th>Naam</th><th>Gekoppeld door</th><th></th></tr></thead>
+              <tbody>
+                <% linked.forEach(function(g) { %>
+                  <tr>
+                    <td><code><%= g.guild_id %></code></td>
+                    <td><%= g.guild_name || '—' %></td>
+                    <td><code><%= g.linked_by %></code></td>
+                    <td class="cta-row">
+                      <a class="btn ghost small" href="/admin?tab=roles&guild=<%= g.guild_id %>">Rollen</a>
+                      <form method="post" action="/admin/unlink">
+                        <input type="hidden" name="guild_id" value="<%= g.guild_id %>" />
+                        <button class="btn ghost small" type="submit">Ontkoppel</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          <% } %>
+        </section>
+      <% } %>
+    </main>
+  </div>
+</body>
+</html>

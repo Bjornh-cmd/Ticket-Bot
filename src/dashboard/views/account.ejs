@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plan · Reedhall</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="shell-side">
+      <%- include('partials/side-nav', { active: 'account' }) %>
+      <div class="side-foot">
+        <span class="status-pill"><%= plan.name %> · <%= usedServers %>/<%= plan.maxServers == null ? '∞' : plan.maxServers %></span>
+        <div style="margin-top:0.55rem"><%= user.global_name || user.username %></div>
+      </div>
+    </aside>
+
+    <div class="shell-main">
+      <header class="shell-top">
+        <strong style="font-family:var(--display)">Jouw plan</strong>
+        <a class="btn ghost small" href="/logout">Uitloggen</a>
+      </header>
+
+      <main class="shell-content">
+        <% if (flash === 'plan_saved') { %><p class="ok-banner">Plan bijgewerkt naar <strong><%= plan.name %></strong>.</p><% } %>
+        <% if (flash === 'plan_locked') { %><p class="err-banner">Planwijzigingen gaan via een beheerder / betaling — zelf upgraden is uitgeschakeld.</p><% } %>
+        <% if (flash === 'plan_limit') { %><p class="err-banner">Te veel gekoppelde servers voor dit plan. Ontkoppel er eerst een paar.</p><% } %>
+
+        <div class="page-head">
+          <h1><%= plan.name %></h1>
+          <p>
+            Account-plan: <strong><%= account.plan %></strong>
+            · <strong><%= plan.priceLabel %></strong>
+            · <%= usedServers %>/<%= plan.maxServers == null ? '∞' : plan.maxServers %> servers
+            · panel-mods: <%= plan.maxPanelStaff === null ? 'onbeperkt' : plan.maxPanelStaff %>
+          </p>
+          <p class="muted">Server-features volgen het plan van de <strong>Discord server-owner</strong>.</p>
+        </div>
+
+        <section class="panel">
+          <h2>Upgrade</h2>
+          <p class="muted">Plannen worden alleen door een platform-admin toegekend (geen self-service upgrade).</p>
+          <p>Huidig: <strong><%= plan.name %></strong><% if (account.plan === 'estate') { %> · pack <%= account.estate_servers || 10 %> servers<% } %></p>
+          <p><a href="/support">Vraag Support</a> als je plan of pack-grootte wilt wijzigen.</p>
+        </section>
+
+        <section class="panel">
+          <h2>In dit plan</h2>
+          <ul class="checklist">
+            <li class="<%= plan.features.tickets ? 'done' : '' %>">Tickets</li>
+            <li class="<%= plan.features.polls ? 'done' : '' %>">Polls</li>
+            <li class="<%= plan.features.welcome ? 'done' : '' %>">Welkom / leave</li>
+            <li class="<%= plan.features.giveaways ? 'done' : '' %>">Giveaways</li>
+            <li class="<%= plan.features.inviteMods ? 'done' : '' %>">Panel-mods uitnodigen</li>
+            <li class="<%= plan.features.branding ? 'done' : '' %>">Bot branding per server</li>
+            <li class="<%= plan.features.ticketQuestionnaires ? 'done' : '' %>">Vragenlijst per ticket-categorie</li>
+            <li class="<%= plan.features.ticketAdvanced ? 'done' : '' %>">Advanced ticket commands</li>
+            <li class="<%= plan.features.linkLogin ? 'done' : '' %>">Link-login per server</li>
+            <li class="<%= plan.features.serverSetup ? 'done' : '' %>">Server setup wizard</li>
+            <li class="<%= plan.features.analytics ? 'done' : '' %>">Analytics &amp; status</li>
+            <li class="<%= plan.features.advancedMod ? 'done' : '' %>">Advanced moderatie</li>
+            <li class="<%= plan.features.botSay ? 'done' : '' %>">Bot-berichten (dashboard)</li>
+          </ul>
+        </section>
+
+        <section class="panel">
+          <h2>Jouw gekoppelde servers</h2>
+          <p class="muted">Servers die meetellen voor jouw plan (<%= usedServers %>/<%= plan.maxServers == null ? '∞' : plan.maxServers %>).</p>
+          <% if (!linkedMine || !linkedMine.length) { %>
+            <p class="muted">Nog geen servers op jouw naam. <a href="/servers">Koppel er een</a>.</p>
+          <% } else { %>
+            <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+              <% linkedMine.forEach(function(g) { %>
+                <li style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;justify-content:space-between;padding:0.55rem 0.7rem;border:1px solid var(--line);border-radius:10px">
+                  <div>
+                    <strong><%= g.guild_name || 'Server' %></strong>
+                    <div class="muted"><code><%= g.guild_id %></code> · sinds <%= g.linked_at %></div>
+                  </div>
+                  <a class="btn ghost small" href="/guild/<%= g.guild_id %>">Open desk</a>
+                </li>
+              <% }) %>
+            </ul>
+          <% } %>
+        </section>
+
+        <section class="panel">
+          <h2>Privacy &amp; data</h2>
+          <div class="cta-row">
+            <a class="btn ghost small" href="/privacy">Privacybeleid</a>
+            <a class="btn ghost small" href="/support">Data verwijderen aanvragen</a>
+            <a class="btn ghost small" href="/logout">Uitloggen</a>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
